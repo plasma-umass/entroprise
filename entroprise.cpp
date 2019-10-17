@@ -1,52 +1,53 @@
 #include <iostream>
 #include <unordered_map>
+#include <cmath>
+#include <cstdlib>
+#include <future>
+#include <iomanip>
+
 using namespace std;
 
-const auto OBJECT_SIZE = 16384; // 4096;
-const auto MIN_ALLOC = 50000;
+float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
+	char *objs[MIN_ALLOC];
+  	unordered_map<char *, int> counter;
+	
+	for (int i = 0; i < MIN_ALLOC; i++)
+		objs[i] = (char *) malloc(OBJECT_SIZE);
+  	for (int i = 0; i < MIN_ALLOC; i++)
+		free(objs[i]);
 
-class Object {
-  char foo[OBJECT_SIZE];
-};
+  	for (int i = 0; i < MIN_ALLOC; i++) {
+		char *p = (char *) malloc(OBJECT_SIZE);
+  	  	if (counter.find(p) == counter.end())
+			counter[p] = 0;
+		counter[p]++;
+		free(p);
+  	}
 
-int
-main()
-{
-  Object ** objs = new Object *[MIN_ALLOC];
-  // Allocate and then free MIN_ALLOC objects.
-  for (auto i = 0; i < MIN_ALLOC; i++) {
-    objs[i] = new Object;
-  }
-  for (auto i = 0; i < MIN_ALLOC; i++) {
-    delete objs[i];
-  }
+  	float entropy = 0.0;
+  	for (auto it = counter.begin(); it != counter.end(); ++it) {
+		char *address = (*it).first;
+  	  	int count = (*it).second;
+  	  	entropy += -log(count / (double) MIN_ALLOC) / log(2.0) * (count / (double) MIN_ALLOC);
+  	}
 
-  unordered_map<Object *, int> counter;
-  // Now repeatedly allocate and free one object.
-  for (auto i = 0; i < MIN_ALLOC; i++) {
-    Object * p;
-    //    p = (Object *) (0x10000 * (i % 8));
-    p = new Object;//    auto p = (Object *) 0x10000; // new Object;
-    if (counter.find(p) == counter.end()) {
-      counter[p] = 0;
-    }
-    counter[p]++;
-    //    cout << reinterpret_cast<void *>(p) << endl;
-    delete p;
-  }
+	return entropy;
+}
 
-  // Print out the histogram.
-  auto entropy = 0.0;
-  for (auto it = counter.begin(); it != counter.end(); ++it) {
-    auto address = (*it).first;
-    auto count = (*it).second;
-    entropy += -log(count/(double)MIN_ALLOC)/log(2.0) * (count/(double)MIN_ALLOC);
-    // cout << address << ", " << count << endl;
-  }
-  //  entropy = -entropy;
-  const auto maxEntropy = log(MIN_ALLOC)/log(2.0);
-  cout << "entropy  = " << entropy << endl;
-  cout << "maximum entropy = " << maxEntropy << endl;
-  cout << "percent of max achievable = " << entropy * 100.0 / maxEntropy << " %" << endl;
-  return 0;
+int main(int argc, char *argv[]) {
+	const int OBJECT_SIZE = stoi(argv[1]), MIN_ALLOC = stoi(argv[2]), NTHREADS = stoi(argv[3]);
+	future<float> *threads = new future<float>[NTHREADS];
+	float entropy = 1, max = log(MIN_ALLOC) / log(2.0);
+
+	for (int i = 0; i < NTHREADS; i++) // Run all threads
+		threads[i] = async(run, OBJECT_SIZE, MIN_ALLOC);
+	for (int i = 0; i < NTHREADS; i++) // Compute average
+		entropy = entropy * threads[i].get();
+
+	entropy = pow(entropy, 1.0 / NTHREADS); // Compute average 
+	cout << fixed;
+	cout << setprecision(4); // For alignment
+	cout << entropy << "   " << max << "   " << entropy * 100.0 / max << "%" << endl;
+
+  	return 0;
 }
