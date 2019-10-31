@@ -8,7 +8,7 @@
 using namespace std;
 
 float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
-	char *objs[MIN_ALLOC];
+	char ** objs = new char *[MIN_ALLOC];
   	unordered_map<char *, int> counter;
 	
 	for (int i = 0; i < MIN_ALLOC; i++)
@@ -30,7 +30,7 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
   	  	int count = (*it).second;
   	  	entropy += -log(count / (double) MIN_ALLOC) / log(2.0) * (count / (double) MIN_ALLOC);
   	}
-
+	delete [] objs;
 	return entropy;
 }
 
