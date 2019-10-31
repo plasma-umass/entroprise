@@ -17,16 +17,11 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 		free(objs[i]);
 
   	for (int i = 0; i < MIN_ALLOC; i++) {
-	  char * v = 0;
-	  // Set to 1 to revert to previous behavior.
-	  for (int j = 0; j < MIN_ALLOC; j++) {
-	    char *p = (char *) malloc(OBJECT_SIZE);
-	    v = (char *) ((uintptr_t) v + (uintptr_t) p);
-	    free(p);
-	  }
-	  if (counter.find(v) == counter.end())
-	    counter[v] = 0;
-	  counter[v]++;
+	  char *p = (char *) malloc(OBJECT_SIZE);
+	  free(p);
+	  if (counter.find(p) == counter.end())
+	    counter[p] = 0;
+	  counter[p]++;
   	}
 
   	float entropy = 0.0;
