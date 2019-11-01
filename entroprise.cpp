@@ -8,7 +8,7 @@
 using namespace std;
 
 float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
-	char *objs[MIN_ALLOC];
+	char ** objs = new char *[MIN_ALLOC];
   	unordered_map<char *, int> counter;
 	
 	for (int i = 0; i < MIN_ALLOC; i++)
@@ -17,11 +17,11 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 		free(objs[i]);
 
   	for (int i = 0; i < MIN_ALLOC; i++) {
-		char *p = (char *) malloc(OBJECT_SIZE);
-  	  	if (counter.find(p) == counter.end())
-			counter[p] = 0;
-		counter[p]++;
-		free(p);
+	  char *p = (char *) malloc(OBJECT_SIZE);
+	  free(p);
+	  if (counter.find(p) == counter.end())
+	    counter[p] = 0;
+	  counter[p]++;
   	}
 
   	float entropy = 0.0;
@@ -30,7 +30,7 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
   	  	int count = (*it).second;
   	  	entropy += -log(count / (double) MIN_ALLOC) / log(2.0) * (count / (double) MIN_ALLOC);
   	}
-
+	delete [] objs;
 	return entropy;
 }
 
