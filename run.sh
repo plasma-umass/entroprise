@@ -1,6 +1,6 @@
 #!/bin/bash
 
-path="LD_PRELOAD=/root/496/lib" # Directory for libraries
+path="LD_PRELOAD=/root/496/poo" # Directory for libraries
 
 run() {
 	sizes=(16 32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536)
