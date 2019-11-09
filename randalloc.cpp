@@ -5,15 +5,6 @@
 
 using namespace std;
 
-void *ec_malloc(size_t sz) {
-	void *ptr = malloc(sz);
-	if (ptr == NULL) {
-		perror("error:");
-		exit(EXIT_FAILURE);
-	}
-	else return ptr;
-}
-
 int main(int argc, char *argv[]) {
 	if (argc != 3) {
 		cerr << "usage: [NOBJS] [SIZE]" << endl;
@@ -24,7 +15,7 @@ int main(int argc, char *argv[]) {
 	char **objs = new char *[NOBJS];
 
 	for (int i = 0; i < NOBJS; ++i)
-		objs[i] = (char *) ec_malloc(SZ);
+		objs[i] = (char *) malloc(SZ);
 	for (int i = 0; i < NOBJS; ++i)
 		free(objs[i]);
 
@@ -36,7 +27,7 @@ int main(int argc, char *argv[]) {
 	unordered_multimap<char *, int>::iterator it;
 
 	for (int i = 0; i < NOBJS; ++i) {
-		char *ptr = (char *) ec_malloc(SZ);
+		char *ptr = (char *) malloc(SZ);
 		it = counter.find(ptr);
 	  	if (it == counter.end()) // If not in map,
 			counter.insert(pair<char *, int>(ptr, ++next)); // Then insert it with unique value
