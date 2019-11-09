@@ -1,0 +1,16 @@
+# List all dieharder tests
+dieharder -l
+
+# Run dieharder
+# <file> is the name of the file you want to run it on (must contain raw 32-bit unsigned ints)
+# <test_number> is the number of the test you want to run (list them all from running dieharder -l)
+# The tests that seem to work for us are...
+# Diehard OPERM5 Test (1)
+# Diehard Runs Test (15)
+# RGB Permutations Test (202)
+# DAB Fill Tree Test (207)
+dieharder -g 201 -f <file> -d <test_number> -D default -D histogram
+
+# List all ways that you can pump numbers into dieharder
+# (not that important for us, but I listed it anyways)
+dieharder -g -1
