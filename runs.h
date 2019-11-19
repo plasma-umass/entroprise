@@ -44,5 +44,7 @@ double table[410] = {
 	0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49998, 0.49998, 0.49998, 0.49998,
 };
 
+double runsTest(const unsigned int, const unsigned int);
+double ksTest(double num[], int length);
 void fatal(std::string str);
 void printRuns(unsigned int *, const int, unsigned int);

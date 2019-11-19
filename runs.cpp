@@ -1,29 +1,42 @@
-// Source: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35d.htm
+// Runs Test: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35d.htm
+// Kolmogorov-Smirnov: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35g.htm
+// Kolmogorov-Smirnov Implementation: https://stackoverflow.com/questions/37625280/kolmogorov-smrinov-test-in-c
 
 #include <iostream>
 #include <algorithm>
+#include <random>
 #include "runs.h"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	if (argc != 2) {
-		fatal("usage: <N>");
+	const unsigned int NRANDS = 1000, NTESTS = 100;
+	double p[NTESTS], d, dAlpha = 0.565; // Assume alpha = 0.05
+	random_device rd;
+
+	for (int i = 0; i < NTESTS; ++i) { // Execute runs test NTESTS times and store p-values
+		p[i] = runsTest(rd(), NRANDS);
+		cout << "p-value #" << i + 1 << " = " << p[i] << endl;
+	}
+	d = ksTest(p, NTESTS); // Run Kolmogorov-Smirnov test to compare with uniform distribution
+
+	cout << endl << "D = " << d << endl;
+	if (dAlpha > d) {
+		cout << "POSSIBLY RANDOM" << endl;
+	} else {
+		cout << "NOT RANDOM" << endl;
 	}
 
-	const unsigned int N = stoi(argv[1]);
+	return 0;
+}
 
-	if (N % 2 != 0) { // N is assumed to be even when calculating median
-		fatal("N must be even");
-	} else if (N > 10000) { // Must restrict value of N to prevent overflow when calculating mean and variance
-		fatal("N cannot be greater than 10000");
-	}
-
-	srand(time(NULL));
-	unsigned int *a = new unsigned int[N], *tmp = new unsigned int[N];
+double runsTest(const unsigned int SEED, const unsigned int N) {
+	mt19937 mt(SEED);
+	uniform_int_distribution<unsigned int> dist;
+	unsigned int a[N], tmp[N];
 
 	for (int i = 0; i < N; ++i) { // Fill with random values
-		a[i] = rand();
+		a[i] = dist(mt);
 		tmp[i] = a[i];
 	}
 
@@ -47,31 +60,38 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (nPlus + nNeg == 0 || nPlus + nNeg == 1) { // Will cause division by zero
-		cerr << "Cannot calculate Z-score and p-value" << endl;
-		return -1;
+	if (nPlus == 0 || nNeg == 0) { // Will cause division by zero
+		return 0;
 	}
 
-	long double expected = (long double) 2 * nPlus * nNeg / (nPlus + nNeg) + 1; // Cast for overflow
-	long double variance = (long double) 2 * nPlus * nNeg * (2 * nPlus * nNeg - nPlus - nNeg); // Cast again for same reason
+	long double expected = (long double) 2 * nPlus * nNeg / (nPlus + nNeg) + 1; // Cast for overflow (these numbers get very big)
+	long double variance = (long double) 2 * nPlus * nNeg * (2 * nPlus * nNeg - nPlus - nNeg); // Cast again
 	variance /= (long double) (nPlus + nNeg) * (nPlus + nNeg) * (nPlus + nNeg - 1);
-	double Z = (nRuns - expected) / sqrt(variance), alpha = 0.05, p;
+	double Z = (nRuns - expected) / sqrt(variance);
 
-	if (abs(Z) >= 4.1) { // To prevent overread in table HERE
-		p = 0;
-	} else {
-		p = 1 - 2 * table[(int) (abs(Z) * 100)]; // Two-tailed hypthesis, Look up value in standard normal table
+	if (abs(Z) >= 4.1) { // To prevent overread in table
+		return 0;
 	}
+	 
+	return 1 - 2 * table[(int) (abs(Z) * 100)]; // Two-tailed hypthesis, Look up value in standard normal table
+}
 
-	cout << "Z-score = " << Z << endl;
-	cout << "p-value = " << p << endl << endl;
-	if (p < alpha) {
-		cout << "Data is not random at p < " << alpha << endl;
-	} else {
-		cout << "Result is not significant at p < " << alpha << endl;
+double ksTest(double num[], int length) {
+	sort(num, num + length); // Must sort data
+	
+	double d[length], n = (double) length, maxPlus, maxNeg; // d stores differences between ECDF and uniform distribution CDF
+
+	for (int i = 0; i < length; ++i) { // Compute maximum distance D+ when uniform distribution is above EDF
+		d[i] = ((i + 1) / n) - num[i]; // Is this correct? ECDF - uniform distribution CDF?
 	}
+	maxPlus = *max_element(d, d + length);
 
-	return 0;
+	for (int i = 0; i < length; ++i) { // Compute maximum distance D- when uniform distribution is below EDF
+		d[i] = (num[i] - (i) / n); // Is this correct? uniform distribution CDF - ECDF?
+	}
+	maxNeg = *max_element(d, d + length);
+	
+	return max(maxPlus, maxNeg); // Return D
 }
 
 void fatal(string str) { // Terminate program
