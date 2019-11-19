@@ -1,4 +1,7 @@
-// One-dimensional standard normal table
+// Runs Test: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35d.htm
+
+#include <algorithm>
+#include "runs.h"
 
 double table[410] = {
 	0.00000, 0.00399, 0.00798, 0.01197, 0.01595, 0.01994, 0.02392, 0.02790, 0.03188, 0.03586,
@@ -44,7 +47,41 @@ double table[410] = {
 	0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49997, 0.49998, 0.49998, 0.49998, 0.49998,
 };
 
-double runsTest(const unsigned int, const unsigned int);
-double ksTest(double num[], int length);
-void fatal(std::string str);
-void printRuns(unsigned int *, const int, unsigned int);
+double runs(long unsigned int a[], const int N) {
+	long unsigned int tmp[N];
+	std::copy(a, a + N, tmp); // Copy a to tmp
+	std::sort(tmp, tmp + N); // Sort to find median
+	long unsigned int median = (tmp[N / 2 - 1] + tmp[N / 2]) / 2; // Assume N is even
+	int sz = 0, nPlus = 0, nNeg = 0;
+
+	for (int i = 0; i < N; ++i) { // Discard elements equal to median and get number of vales greater or less than median
+		if (a[i] != median) {
+			if (a[i] > median) ++nPlus;
+			else ++nNeg;
+			tmp[sz++] = a[i];
+		}
+	}
+
+	int nRuns = (sz != 0) ? 1 : 0; // If there is at least one element, there will be at least 1 run. Otherwise, there are no runs.
+	for (int i = 0; i < sz - 1; ++i) { // Find number of runs
+		bool b1 = (tmp[i] > median), b2 = (tmp[i + 1] > median);
+		if ((b1 && !b2) || (!b1 && b2)) { // If moving from + to - or - to +
+			++nRuns;	
+		}
+	}
+
+	if (nPlus == 0 || nNeg == 0) { // Will cause division by zero
+		return 0;
+	}
+
+	long double expected = (long double) 2 * nPlus * nNeg / (nPlus + nNeg) + 1; // Cast for overflow (these numbers get very big)
+	long double variance = (long double) 2 * nPlus * nNeg * (2 * nPlus * nNeg - nPlus - nNeg); // Cast again
+	variance /= (long double) (nPlus + nNeg) * (nPlus + nNeg) * (nPlus + nNeg - 1);
+	double Z = (nRuns - expected) / sqrt(variance);
+
+	if (std::abs(Z) >= 4.1) { // To prevent overread in table
+		return 0;
+	}
+	 
+	return 1 - 2 * table[(int) (std::abs(Z) * 100)]; // Two-tailed hypthesis, Look up value in standard normal table
+}
