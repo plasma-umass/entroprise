@@ -35,6 +35,11 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 }
 
 int main(int argc, char *argv[]) {
+	if (argc != 4) {
+		cerr << "usage: <OBJECT_SIZE> <MIN_ALLOC> <NTHREADS>" << endl;
+		return -1;
+	}
+
 	const int OBJECT_SIZE = stoi(argv[1]), MIN_ALLOC = stoi(argv[2]), NTHREADS = stoi(argv[3]);
 	future<float> *threads = new future<float>[NTHREADS];
 	float entropy = 1, max = log(MIN_ALLOC) / log(2.0);

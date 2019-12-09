@@ -8,7 +8,7 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-	const int NRANDS = 1000, NTESTS = 100;
+	const int NRANDS = 10000, NTESTS = 100;
 	long unsigned int a[NRANDS];
 	double p[NTESTS], d, dAlpha = 0.565; // Assume alpha = 0.05
 	random_device rd;

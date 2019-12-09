@@ -1,5 +1,5 @@
-#ifndef KS_H
-#define KS_H
+#ifndef __KS_H
+#define __KS_H
 
 double ks(double[], int);
 

@@ -1,5 +1,5 @@
-#ifndef RUNS_H
-#define RUNS_H
+#ifndef __RUNS_H
+#define __RUNS_H
 
 double runs(long unsigned int[], const int);
 
