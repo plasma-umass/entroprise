@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS=-pthread -std=c++11
+CXXFLAGS=-IHeap-Layers -pthread -std=c++14
 OBJ=entroprise.o
 
 %.o: %.c $(DEPS)

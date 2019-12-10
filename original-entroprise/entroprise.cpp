@@ -5,11 +5,20 @@
 #include <future>
 #include <iomanip>
 
+#include <heaplayers>
+using namespace HL;
 using namespace std;
+
+#include <list>
+#include <map>
+
+template <typename T>
+class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
 
 float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 	char ** objs = new char *[MIN_ALLOC];
-  	unordered_map<char *, int> counter;
+	list<int, MyAllocator<int>> foo;
+        map<char *, int, MyAllocator<pair<char * const, int>>> counter;
 	
 	for (int i = 0; i < MIN_ALLOC; i++) {
 		objs[i] = (char *) malloc(OBJECT_SIZE);
