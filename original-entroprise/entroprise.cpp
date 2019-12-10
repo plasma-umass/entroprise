@@ -15,14 +15,17 @@ using namespace std;
 template <typename T>
 class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
 
+
+/*template <class T>
+  class MyAllocator : public STLAllocator<T, NoHeap> {};*/
+
 float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 	char ** objs = new char *[MIN_ALLOC];
-	list<int, MyAllocator<int>> foo;
-        map<char *, int, MyAllocator<pair<char * const, int>>> counter;
+        unordered_map<char *, int, std::hash<char *>, std::equal_to<char *>, MyAllocator<pair<char * const, int>>> counter;
 	
 	for (int i = 0; i < MIN_ALLOC; i++) {
 		objs[i] = (char *) malloc(OBJECT_SIZE);
-		counter[objs[i]] = 0;
+		//		counter[objs[i]] = 0;
 	}
   	for (int i = 0; i < MIN_ALLOC; i++) {
 		free(objs[i]);
@@ -30,11 +33,11 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
   	for (int i = 0; i < MIN_ALLOC; i++) {
 	  char *p = (char *) malloc(OBJECT_SIZE);
 	  char buf[255];
-	  sprintf(buf, "%p\n", p);
-	  printf(buf);
+	  //	  sprintf(buf, "%p\n", p);
+	  //	  printf(buf);
 	  free(p);
 	  if (counter.find(p) == counter.end()) {
-	    printf("THIS SHOULD NEVER HAPPEN.\n");
+	    //	    printf("THIS SHOULD NEVER HAPPEN.\n");
 	    counter[p] = 0;
 	  }
 	  counter[p]++;
