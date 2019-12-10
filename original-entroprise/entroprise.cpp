@@ -11,16 +11,23 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
 	char ** objs = new char *[MIN_ALLOC];
   	unordered_map<char *, int> counter;
 	
-	for (int i = 0; i < MIN_ALLOC; i++)
+	for (int i = 0; i < MIN_ALLOC; i++) {
 		objs[i] = (char *) malloc(OBJECT_SIZE);
-  	for (int i = 0; i < MIN_ALLOC; i++)
+		counter[objs[i]] = 0;
+	}
+  	for (int i = 0; i < MIN_ALLOC; i++) {
 		free(objs[i]);
-
+	}
   	for (int i = 0; i < MIN_ALLOC; i++) {
 	  char *p = (char *) malloc(OBJECT_SIZE);
+	  char buf[255];
+	  sprintf(buf, "%p\n", p);
+	  printf(buf);
 	  free(p);
-	  if (counter.find(p) == counter.end())
+	  if (counter.find(p) == counter.end()) {
+	    printf("THIS SHOULD NEVER HAPPEN.\n");
 	    counter[p] = 0;
+	  }
 	  counter[p]++;
   	}
 
