@@ -4,40 +4,33 @@
 #include <cstdlib>
 #include <future>
 #include <iomanip>
-
-#include <heaplayers>
-using namespace HL;
-using namespace std;
-
 #include <list>
 #include <map>
+#include <mutex>
+#include <heaplayers>
+
+using namespace HL;
+using namespace std;
 
 template <typename T>
 class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
 
-
-/*template <class T>
-  class MyAllocator : public STLAllocator<T, NoHeap> {};*/
-
 float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
-	char ** objs = new char *[MIN_ALLOC];
-        unordered_map<char *, int, std::hash<char *>, std::equal_to<char *>, MyAllocator<pair<char * const, int>>> counter;
-	
+	char **objs = new char *[MIN_ALLOC];
+	unordered_map<char *, int, hash<char *>, equal_to<char *>, MyAllocator<pair<char * const, int>>> counter;
+
 	for (int i = 0; i < MIN_ALLOC; i++) {
 		objs[i] = (char *) malloc(OBJECT_SIZE);
-		//		counter[objs[i]] = 0;
 	}
   	for (int i = 0; i < MIN_ALLOC; i++) {
 		free(objs[i]);
 	}
+	delete [] objs;
+
   	for (int i = 0; i < MIN_ALLOC; i++) {
 	  char *p = (char *) malloc(OBJECT_SIZE);
-	  char buf[255];
-	  //	  sprintf(buf, "%p\n", p);
-	  //	  printf(buf);
 	  free(p);
 	  if (counter.find(p) == counter.end()) {
-	    //	    printf("THIS SHOULD NEVER HAPPEN.\n");
 	    counter[p] = 0;
 	  }
 	  counter[p]++;
@@ -49,7 +42,6 @@ float run(const int OBJECT_SIZE, const int MIN_ALLOC) {
   	  	int count = (*it).second;
   	  	entropy += -log(count / (double) MIN_ALLOC) / log(2.0) * (count / (double) MIN_ALLOC);
   	}
-	delete [] objs;
 	return entropy;
 }
 
@@ -61,10 +53,10 @@ int main(int argc, char *argv[]) {
 
 	const int OBJECT_SIZE = stoi(argv[1]), MIN_ALLOC = stoi(argv[2]), NTHREADS = stoi(argv[3]);
 	future<float> *threads = new future<float>[NTHREADS];
-	float entropy = 1, max = log(MIN_ALLOC) / log(2.0);
+	float entropy = 1, max = log(MIN_ALLOC / NTHREADS) / log(2.0);
 
 	for (int i = 0; i < NTHREADS; i++) // Run all threads
-		threads[i] = async(run, OBJECT_SIZE, MIN_ALLOC);
+		threads[i] = async(run, OBJECT_SIZE, MIN_ALLOC / NTHREADS);
 	for (int i = 0; i < NTHREADS; i++) // Compute average
 		entropy = entropy * threads[i].get();
 

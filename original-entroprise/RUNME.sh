@@ -1,10 +1,11 @@
 #!/bin/bash
+# Runs all allocators for every given object size, number of objects, and number of threads
 
 outspath="out" # Directory for output of each allocator
-outs=("dieharder" "freeguard" "guarder" "scudo" "jemalloc" "tcmalloc" "mimalloc-secure") # Names for output files
+outs=("dieharder" "freeguard" "guarder" "scudo" "jemalloc" "tcmalloc" "smimalloc") # Names for output files
 libspath="/root/496/lib" # Directory for shared libraries
 libs=("libdiehard.so" "libfreeguard.so" "libguarder.so" "libclang_rt.scudo-x86_64.so" "libjemalloc.so" "libtcmalloc.so.4" "libmimalloc-secure.so") # Names of shared libraries (order of libraries must match names of each in outs)
-sizes=(16 32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536) # Size classes
+sizes=(16 32 64 128 256 512 1024 2048 4096 8192 16384 32768) # Size classes
 nobjs=(100 1000 10000) # Number of objects
 nthreads=(1 2 4 8) # Number of threads
 
