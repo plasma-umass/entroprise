@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS=-IHeap-Layers -pthread -std=c++14
+CXXFLAGS=-IHeap-Layers -Icpp-HyperLogLog/include -pthread -std=c++14
 OBJ=entroprise.o
 
 all: $(OBJ) Heap-Layers
