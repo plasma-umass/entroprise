@@ -65,9 +65,9 @@ double runs(long unsigned int a[], const int N) {
 			if (a[i] > median) ++nPlus;
 			else ++nNeg;
 			tmp[sz++] = a[i];
-			// if (i % 100 == 0) {
-			// 	printf("nPlus = %d, nNeg = %d\n", nPlus, nNeg);
-			// }
+			if (i % 100 == 0) {
+				printf("nPlus = %d, nNeg = %d\n", nPlus, nNeg);
+			}
 		} else {
 			++ct;
 		}

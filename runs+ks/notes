@@ -1,3 +1,0 @@
-Guarder only spits out 0 for p-value first 5 times (50000 allocations)
-Gives same p-value when run in short succession? Using time as seed for RNG?
-Guarder doesn't spit out 0 for p-values for small number of allocations (< 10000)

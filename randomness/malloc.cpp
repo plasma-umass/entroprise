@@ -14,7 +14,7 @@ void printDist(double p[], const int NTESTS);
 int main() {
  	// const int NALLOCS = 10000, NTESTS = 100, SZ = 16;
  	// long unsigned int *addrs = new long unsigned int [NALLOCS * 100];
- 	const int NALLOCS = 10000, NTESTS = 100, SZ = 16;
+ 	const int NALLOCS = 10000, NTESTS = 1, SZ = 16;
  	long unsigned int *addrs = new long unsigned int [NALLOCS];
  	double p[NTESTS], d, dAlpha = 0.565;
  
@@ -33,6 +33,7 @@ int main() {
  		p[i] = runs(addrs, NALLOCS);
 		cout << p[i] << endl;
  	}
+	return 0;
 	cout << endl << "P-VALUE DISTRIBUTION" << endl;
 	printDist(p, NTESTS);
 	cout << endl << "KOLMOGOROV-SMIRNOV TEST" << endl;
