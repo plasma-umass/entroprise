@@ -57,7 +57,6 @@ void *malloc(size_t size) {
     if (addrs == NULL || hppLock == NULL || cmpLock == NULL || printLock == NULL) {
         return ptr;
     }
-    PDEBUG("Address = @, Size = @\n", ptr, size);
     hppLock->lock();
     addrs->add((char *) &ptr, sizeof(void *));
     hppLock->unlock();
