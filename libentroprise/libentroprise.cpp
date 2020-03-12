@@ -9,64 +9,50 @@
 #include <murmur3.h>
 #include <tprintf.h>
 
-hll::HyperLogLog *addrs = new hll::HyperLogLog(6);
-bool isFirstMalloc = true;
-int numAllocs = 0, nextIndex = 1, fd = -1;
-void *(*realMalloc)(size_t);
-std::mutex *hppLock = new std::mutex(), *cmpLock = new std::mutex(), *printLock = new std::mutex();
-
-inline void writeEntropy() {
-    double cardinality, entropy, percentage, max;
-    max = log(numAllocs) / log(2.0);
-    cmpLock->unlock();
-    hppLock->lock();
-    cardinality = addrs->estimate();
-    hppLock->unlock();
-    entropy = log(cardinality) / log(2.0);
-    if (max == 0) {
-        percentage = 100;
-    } else {
-        percentage = entropy * 100.0 / max;
-    }
-    printLock->lock();
-    tprintf::tprintf(
-        "Number of Allocations: @\n"
-        "Number of Unique Addresses: @\n"
-        "Calculated Entropy: @\n"
-        "Maximum Entropy: @\n"
-        "Percentage of Maximum: @%\n\n",
-        numAllocs, cardinality, entropy, max, percentage
-    );
-    printLock->unlock();
-}
+void *(*realMalloc)(size_t) = NULL;
+std::mutex *mtx = new std::mutex();
+hll::HyperLogLog *addrs = new hll::HyperLogLog(6); // TODO: Adjust value?
+int numAllocs = 0, nextIndex = 1, fd;
+double cardinality, entropy, maxEntropy, percentage;
 
 void *malloc(size_t size) {
     void *ptr;
-    if (isFirstMalloc) {
+    if (realMalloc == NULL) { // First malloc
         realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
         if (realMalloc == NULL) {
             return NULL;
         }
         fd = creat("entroprise-results.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         if (fd == -1) {
-            write(STDERR_FILENO, "ERROR: Cannot create out file\n", 30);
+            write(STDERR_FILENO, "libentroprise: Cannot create out file\n", 38);
         }
-        isFirstMalloc = false;
     }
     ptr = realMalloc(size);
-    if (addrs == NULL || hppLock == NULL || cmpLock == NULL || printLock == NULL) {
+    if (mtx == NULL || addrs == NULL) { // Call to malloc is either for mtx or addrs
         return ptr;
     }
-    hppLock->lock();
+    mtx->lock();
     addrs->add((char *) &ptr, sizeof(void *));
-    hppLock->unlock();
-    cmpLock->lock();
     numAllocs++;
-    if (numAllocs == nextIndex) {
+    if (numAllocs == nextIndex) { // Print data every power of two
         nextIndex <<= 1;
-        writeEntropy(); // Releases cmpLock
-    } else {
-        cmpLock->unlock();
+        cardinality = addrs->estimate();
+        entropy = log(cardinality) / log(2.0);
+        maxEntropy = log(numAllocs) / log(2.0);
+        if (maxEntropy == 0) {
+            percentage = 100;
+        } else {
+            percentage = entropy * 100.0 / maxEntropy;
+        }
+        tprintf::tprintf(
+            "Number of Allocations: @\n"
+            "Number of Unique Addresses: @\n"
+            "Calculated Entropy: @\n"
+            "Maximum Entropy: @\n"
+            "Percentage of Maximum: @%\n\n",
+            numAllocs, cardinality, entropy, maxEntropy, percentage
+        );
     }
+    mtx->unlock();
     return ptr;
 }

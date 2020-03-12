@@ -1,6 +1,6 @@
 HLDIR=Heap-Layers/utility/
 HPPDIR=cpp-HyperLogLog/include/
-CXX=clang++
+CXX=g++
 CXXFLAGS=-shared -Wl,--no-as-needed -ldl -fPIC -std=c++14 -I$(HLDIR) -I$(HPPDIR)
 OBJ=libentroprise.o
 
