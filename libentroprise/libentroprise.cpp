@@ -6,39 +6,71 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <hyperloglog.hpp>
-#include <murmur3.h>
 #include <tprintf.h>
+#include <unistd.h>
+#include <string.h>
 
-void *(*realMalloc)(size_t) = NULL;
-std::mutex *mtx = new std::mutex();
-hll::HyperLogLog *addrs = new hll::HyperLogLog(6); // TODO: Adjust value?
-int numAllocs = 0, nextIndex = 1, fd;
-double cardinality, entropy, maxEntropy, percentage;
+/* 
+    * HYPERLOGLOG MODIFICATIONS:
+    
+    * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
+    * Replace vector init with memset in HLL constructor
+    * Comment out every method but add and estimate
+
+    * HEAPLAYERS MODIFICATIONS:
+
+    * Change FD to 3 in Heap-Layers/utility/tprintf.h
+*/
+
+class Data {
+    public:
+        Data() {
+            char *err1 = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
+            char *err2 = (char *) "libenroprise: ERROR: cannot create out file\n";
+            realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
+            if (realMalloc == NULL) {
+                write(STDERR_FILENO, err1, strlen(err1));
+                exit(EXIT_FAILURE);
+            }
+            numAllocs = 0;
+            nextIndex = 1;
+            fd = creat("entroprise-results.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+            if (fd == -1) {
+                write(STDERR_FILENO, err2, strlen(err2));
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        void *(*realMalloc)(size_t);
+        std::mutex mtx;
+        hll::HyperLogLog addrs = hll::HyperLogLog(16);
+        int numAllocs, nextIndex, fd;
+};
+
+inline static Data *getData() {
+    static char buf[sizeof(Data)];
+    static Data *data = new (buf) Data;
+    return data;
+}
 
 void *malloc(size_t size) {
+    static Data *data;
+    data = getData();
+    int localNumAllocs;
+    double cardinality, entropy, maxEntropy, percentage;
     void *ptr;
-    if (realMalloc == NULL) { // First malloc
-        realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
-        if (realMalloc == NULL) {
-            return NULL;
-        }
-        fd = creat("entroprise-results.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-        if (fd == -1) {
-            write(STDERR_FILENO, "libentroprise: Cannot create out file\n", 38);
-        }
-    }
-    ptr = realMalloc(size);
-    if (mtx == NULL || addrs == NULL) { // Call to malloc is either for mtx or addrs
-        return ptr;
-    }
-    mtx->lock();
-    addrs->add((char *) &ptr, sizeof(void *));
-    numAllocs++;
-    if (numAllocs == nextIndex) { // Print data every power of two
-        nextIndex <<= 1;
-        cardinality = addrs->estimate();
+
+    ptr = data->realMalloc(size);
+    data->mtx.lock();
+    data->addrs.add((char *) &ptr, sizeof(void *));
+    data->numAllocs++;
+    if (data->numAllocs == data->nextIndex) { // Print data every power of two
+        data->nextIndex <<= 1;
+        localNumAllocs = data->numAllocs;
+        cardinality = data->addrs.estimate();
+        data->mtx.unlock();
+        maxEntropy = log(localNumAllocs) / log(2.0);
         entropy = log(cardinality) / log(2.0);
-        maxEntropy = log(numAllocs) / log(2.0);
         if (maxEntropy == 0) {
             percentage = 100;
         } else {
@@ -50,9 +82,10 @@ void *malloc(size_t size) {
             "Calculated Entropy: @\n"
             "Maximum Entropy: @\n"
             "Percentage of Maximum: @%\n\n",
-            numAllocs, cardinality, entropy, maxEntropy, percentage
+            localNumAllocs, cardinality, entropy, maxEntropy, percentage
         );
+    } else {
+        data->mtx.unlock();
     }
-    mtx->unlock();
     return ptr;
 }
