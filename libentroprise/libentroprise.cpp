@@ -20,6 +20,12 @@
     * HEAPLAYERS MODIFICATIONS:
 
     * Change FD to 3 in Heap-Layers/utility/tprintf.h
+
+    * FREEGUARD/GUARDER MODIFICATIONS
+
+    * In libfreeguard.cpp/libguarder.cpp, comment out the xxcalloc alias
+    * Is this correct? Only uses glibc calloc...
+    * Would have to intercept calloc myself
 */
 
 class Data {
@@ -28,23 +34,18 @@ class Data {
             char *err1 = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
             char *err2 = (char *) "libenroprise: ERROR: cannot create out file\n";
             realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
-            if (realMalloc == NULL) {
+            if (realMalloc == nullptr) {
                 write(STDERR_FILENO, err1, strlen(err1));
                 exit(EXIT_FAILURE);
             }
             numAllocs = 0;
             nextIndex = 1;
-            fd = creat("entroprise-results.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-            if (fd == -1) {
-                write(STDERR_FILENO, err2, strlen(err2));
-                exit(EXIT_FAILURE);
-            }
         }
 
         void *(*realMalloc)(size_t);
         std::mutex mtx;
         hll::HyperLogLog addrs = hll::HyperLogLog(16);
-        int numAllocs, nextIndex, fd;
+        int numAllocs, nextIndex;
 };
 
 inline static Data *getData() {
