@@ -17,15 +17,15 @@ void func(const int NUM_ITERS, const int OBJ_SIZE) {
         std::cerr << "usage: <nthreads> <niters> <objsize>" << std::endl;
         return -1;
     }
-     const int NUM_THREADS = std::stoi(argv[1]), NUM_ITERS = std::stoi(argv[2]), OBJ_SIZE = std::stoi(argv[3]);
-     std::thread threads[NUM_THREADS];
-     std::cout << "Starting test..." << std::endl;
-     for (int i = 0; i < NUM_THREADS; i++) {
-         threads[i] = std::thread(func, NUM_ITERS, OBJ_SIZE);
-     }
-     for (int i = 0; i < NUM_THREADS; i++) {
-         threads[i].join();
-     }
-     std::cout << "Ending test..." << std::endl;
-     return 0;
+    const int NUM_THREADS = std::stoi(argv[1]), NUM_ITERS = std::stoi(argv[2]), OBJ_SIZE = std::stoi(argv[3]);
+    std::thread *threads = new std::thread[NUM_THREADS];
+    std::cout << "Starting test..." << std::endl;
+    for (int i = 0; i < NUM_THREADS; i++) {
+        threads[i] = std::thread(func, NUM_ITERS, OBJ_SIZE);
+    }
+    for (int i = 0; i < NUM_THREADS; i++) {
+        threads[i].join();
+    }
+    std::cout << "Ending test..." << std::endl;
+    return 0;
  }
