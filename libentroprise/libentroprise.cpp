@@ -16,35 +16,19 @@
     * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
     * Replace vector init with memset in HLL constructor
     * Comment out every method but add and estimate
-
-    * HEAPLAYERS MODIFICATIONS:
-
-    * Change FD to 3 in Heap-Layers/utility/tprintf.h
 */
 
 class Data {
     public:
         Data() {
-            char *err1 = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
-            char *err2 = (char *) "libenroprise: ERROR: cannot create out file\n";
-            realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
-            if (realMalloc == NULL) {
-                write(STDERR_FILENO, err1, strlen(err1));
-                exit(EXIT_FAILURE);
-            }
+            addrs = hll::HyperLogLog(16);
             numAllocs = 0;
             nextIndex = 1;
-            fd = creat("entroprise-results.out", S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-            if (fd == -1) {
-                write(STDERR_FILENO, err2, strlen(err2));
-                exit(EXIT_FAILURE);
-            }
         }
 
-        void *(*realMalloc)(size_t);
-        std::mutex mtx;
-        hll::HyperLogLog addrs = hll::HyperLogLog(16);
-        int numAllocs, nextIndex, fd;
+        std::mutex dataMtx, writeMtx;
+        hll::HyperLogLog addrs;
+        int numAllocs, nextIndex;
 };
 
 inline static Data *getData() {
@@ -54,21 +38,37 @@ inline static Data *getData() {
 }
 
 void *malloc(size_t size) {
-    static Data *data;
-    data = getData();
+    static void *(*realMalloc)(size_t) = nullptr;
+    static bool isDlsym = false;
+    static char *err = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
+    static Data *data = nullptr;
     int localNumAllocs;
     double cardinality, entropy, maxEntropy, percentage;
     void *ptr;
 
-    ptr = data->realMalloc(size);
-    data->mtx.lock();
+    if (isDlsym) { // If isDlsym, then this is a recursive call to malloc
+        return nullptr;
+    }
+    if (realMalloc == nullptr) { // If realMalloc is null, then we need to interpose malloc
+        isDlsym = true;
+        realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
+        if (realMalloc == nullptr) { // Make sure dlsym worked
+            write(STDERR_FILENO, err, strlen(err));
+            exit(EXIT_FAILURE);
+        }
+        isDlsym = false;
+    }
+    data = getData(); // Fetch rest of data
+
+    ptr = realMalloc(size);
+    data->dataMtx.lock();
     data->addrs.add((char *) &ptr, sizeof(void *));
     data->numAllocs++;
     if (data->numAllocs == data->nextIndex) { // Print data every power of two
         data->nextIndex <<= 1;
         localNumAllocs = data->numAllocs;
         cardinality = data->addrs.estimate();
-        data->mtx.unlock();
+        data->dataMtx.unlock();
         maxEntropy = log(localNumAllocs) / log(2.0);
         entropy = log(cardinality) / log(2.0);
         if (maxEntropy == 0) {
@@ -76,16 +76,18 @@ void *malloc(size_t size) {
         } else {
             percentage = entropy * 100.0 / maxEntropy;
         }
+        data->writeMtx.lock();
         tprintf::tprintf(
-            "Number of Allocations: @\n"
-            "Number of Unique Addresses: @\n"
-            "Calculated Entropy: @\n"
-            "Maximum Entropy: @\n"
-            "Percentage of Maximum: @%\n\n",
+            "libentroprise: Number of Allocations: @\n"
+            "libentroprise: Number of Unique Addresses: @\n"
+            "libentroprise: Calculated Entropy: @\n"
+            "libentroprise: Maximum Entropy: @\n"
+            "libentroprise: Percentage of Maximum: @%\n\n",
             localNumAllocs, cardinality, entropy, maxEntropy, percentage
         );
+        data->writeMtx.unlock();
     } else {
-        data->mtx.unlock();
+        data->dataMtx.unlock();
     }
     return ptr;
 }
