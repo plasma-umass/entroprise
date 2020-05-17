@@ -16,6 +16,7 @@
     * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
     * Replace vector init with memset in HLL constructor
     * Comment out every method but add and estimate
+
 */
 
 class Data {
@@ -37,7 +38,7 @@ inline static Data *getData() {
     return data;
 }
 
-void *malloc(size_t size) {
+extern "C" void *xxmalloc(size_t size) {
     static void *(*realMalloc)(size_t) = nullptr;
     static bool isDlsym = false;
     static char *err = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
@@ -90,4 +91,28 @@ void *malloc(size_t size) {
         data->dataMtx.unlock();
     }
     return ptr;
+}
+
+extern "C" void xxfree(void *ptr) {
+    static void (*real_free)(void *) = nullptr;
+    if (real_free == nullptr) {
+        real_free = (void (*)(void *)) dlsym(RTLD_NEXT, "free");
+    }
+    real_free(ptr);
+}
+
+extern "C" size_t xxmalloc_usable_size(void *ptr) {
+    static size_t (*real_malloc_usable_size)(void *) = nullptr;
+    if (real_malloc_usable_size == nullptr) {
+        real_malloc_usable_size = (size_t(*)(void *)) dlsym(RTLD_NEXT, "malloc_usable_size");
+    }
+    return real_malloc_usable_size(ptr);
+}
+
+extern "C" void xxmalloc_lock(void) {
+    return;
+}
+
+extern "C" void xxmalloc_unlock(void) {
+    return;
 }
