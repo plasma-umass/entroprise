@@ -10,7 +10,7 @@ void func(const int NUM_ITERS, const int OBJ_SIZE) {
         memset(addrs[i], 'a', OBJ_SIZE);
         free(addrs[i]);
      }
- }
+}
 
  int main(int argc, char *argv[]) {
     if (argc != 4) {
