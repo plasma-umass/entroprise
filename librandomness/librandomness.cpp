@@ -6,6 +6,8 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <dlfcn.h>
+#include <string.h>
+#include <tprintf.h>
 
 extern "C" void *xxmalloc(size_t size) {
     static void *(*realMalloc)(size_t) = nullptr;
@@ -13,6 +15,7 @@ extern "C" void *xxmalloc(size_t size) {
     static int fd, index = 0, *numAllocs;
     static void **addrs;
     static struct stat statBuf;
+    static char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
     void *ptr;
     if (realMalloc == nullptr) {
         if (hasDlsym) {
@@ -23,16 +26,20 @@ extern "C" void *xxmalloc(size_t size) {
         hasDlsym = false;
         fd = open("addrs.bin", O_RDWR);
         if (fd == -1) {
+            write(STDERR_FILENO, err1, strlen(err1));
             exit(EXIT_FAILURE);
         }
         if (fstat(fd, &statBuf) == -1) {
+            write(STDERR_FILENO, err2, strlen(err2));
             exit(EXIT_FAILURE);
         }
         numAllocs = (int *) mmap(NULL, statBuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (numAllocs == MAP_FAILED) {
+            write(STDERR_FILENO, err3, strlen(err3));
             exit(EXIT_FAILURE);
         }
         if (madvise(numAllocs, statBuf.st_size, MADV_SEQUENTIAL) == -1) {
+            write(STDERR_FILENO, err4, strlen(err4));
             exit(EXIT_FAILURE);
         }
         *numAllocs = 0;
@@ -41,6 +48,9 @@ extern "C" void *xxmalloc(size_t size) {
     ptr = realMalloc(size);
     *numAllocs = *numAllocs + 1;
     addrs[index++] = ptr;
+    // #ifdef DEBUG
+    tprintf::tprintf("@: malloc(@) = @\n", *numAllocs, size, ptr);
+    // #endif
     return ptr;
 }
 
