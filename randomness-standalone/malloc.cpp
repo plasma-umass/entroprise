@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdint>
-#include "runs.h"
-#include "ks.h"
+#include "runs.hh"
+#include "ks.hh"
 
 using namespace std;
 

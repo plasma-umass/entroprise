@@ -1,9 +1,11 @@
 // Runs Test: https://www.itl.nist.gov/div898/handbook/eda/section3/eda35d.htm
 
+#ifndef __RUNS_HH
+#define __RUNS_HH
+
 #include <algorithm>
 #include <iostream>
-#include <math.h>
-#include "runs.h"
+#include <cmath>
 
 double table[410] = {
 	0.00000, 0.00399, 0.00798, 0.01197, 0.01595, 0.01994, 0.02392, 0.02790, 0.03188, 0.03586,
@@ -58,22 +60,14 @@ double runs(long unsigned int a[], const int N) {
 	std::sort(tmp, tmp + N);
 	long unsigned int median = (tmp[N / 2 - 1] + tmp[N / 2]) / 2; // Assume N is even
 	int sz = 0, nPlus = 0, nNeg = 0;
-	int ct = 0;
 
 	for (int i = 0; i < N; ++i) { // Discard elements equal to median and get number of vales greater or less than median
 		if (a[i] != median) {
 			if (a[i] > median) ++nPlus;
 			else ++nNeg;
 			tmp[sz++] = a[i];
-			if (i % 100 == 0) {
-				printf("nPlus = %d, nNeg = %d\n", nPlus, nNeg);
-			}
-		} else {
-			++ct;
 		}
 	}
-
-	// printRuns(tmp, N, median);
 
 	int nRuns = (sz != 0) ? 1 : 0; // If there is at least one element, there will be at least 1 run. Otherwise, there are no runs.
 	for (int i = 0; i < sz - 1; ++i) { // Find number of runs
@@ -91,18 +85,6 @@ double runs(long unsigned int a[], const int N) {
 	double variance = bigMultiply(2 * bigMultiply(nPlus, nNeg), 2 * bigMultiply(nPlus, nNeg) - nPlus - nNeg); // Cast again
 	variance /= bigMultiply(bigMultiply(nPlus + nNeg, nPlus + nNeg), (nPlus + nNeg - 1));
 	double Z = (nRuns - expected) / sqrt(variance);
-	// long double expected = (long double) 2 * nPlus * nNeg / (nPlus + nNeg) + 1; // Cast for overflow (these numbers get very big)
-	// long double variance = (long double) 2 * nPlus * nNeg * (2 * nPlus * nNeg - nPlus - nNeg); // Cast again
-	// variance /= (long double) (nPlus + nNeg) * (nPlus + nNeg) * (nPlus + nNeg - 1);
-	// printf(
-	// 	"+: %d\n"
-	// 	"-: %d\n"
-	// 	"expected: %Lf\n"
-	// 	"variance: %Lf\n"
-	// 	"other: %f\n"
-	// 	"Z: %f\n",
-	// 	nPlus, nNeg, expected, variance, other, Z
-	// );
 
 	if (std::abs(Z) >= 4.1) { // To prevent overread in table
 		return 0;
@@ -111,6 +93,7 @@ double runs(long unsigned int a[], const int N) {
 	return 1 - 2 * table[(int) (std::abs(Z) * 100)]; // Two-tailed hypthesis, Look up value in standard normal table
 }
 
+#ifdef DEBUG
 void printRuns(long unsigned int a[], const int N, long unsigned int median) {
 	for (int i = 0; i < N; ++i) {
 		if (a[i] > median) {
@@ -120,28 +103,10 @@ void printRuns(long unsigned int a[], const int N, long unsigned int median) {
 		}
 	}
 }
+#endif
 
 double bigMultiply(double f1, double f2) {
 	return pow(M_E, log(f1) + log(f2));
 }
 
-// int main() {
-//  	const int NALLOCS = 10000, SZ = 16;
-//  	long unsigned int *addrs = new long unsigned int [NALLOCS];
-//  	double p;
-//  
-//  	for (int i = 0; i < NALLOCS; ++i) {
-//  		addrs[i] = (long unsigned int) malloc(SZ);
-//  	}
-// 	for (int i = 0; i < NALLOCS; ++i) {
-// 		free((void *) addrs[i]);
-// 	}
-// 	for (int i = 0; i < NALLOCS ; ++i) {
-//  		addrs[i] = (long unsigned int) malloc(SZ);
-// 		free((void *) addrs[i]);
-// 	}
-// 
-//  	p = runs(addrs, NALLOCS);
-// 	std::cout << p << std::endl;
-// 	return 0;
-// }
+#endif
