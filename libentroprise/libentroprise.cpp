@@ -1,14 +1,12 @@
 #include <cstdlib>
-#include <cmath>
 #include <mutex>
+#include <atomic>
+#include <new>
 #include <dlfcn.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <hyperloglog.hpp>
 #include <tprintf.h>
 #include <unistd.h>
-#include <string.h>
+#include "proc.hh"
 
 /* 
     * HYPERLOGLOG MODIFICATIONS:
@@ -16,80 +14,55 @@
     * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
     * Replace vector init with memset in HLL constructor
     * Comment out every method but add and estimate
-
 */
 
 class Data {
     public:
         Data() {
-            addrs = hll::HyperLogLog(16);
-            numAllocs = 0;
-            nextIndex = 1;
+            void *map = get_proc_data();
+            h = hll::HyperLogLog(16);
+            num_allocs = new(map) std::atomic<int>(0);
+            card = (double *) ((char *) map + sizeof(*num_allocs));
         }
 
-        std::mutex dataMtx, writeMtx;
-        hll::HyperLogLog addrs;
-        int numAllocs, nextIndex;
+        hll::HyperLogLog h;
+        std::mutex mtx;
+        std::atomic<int> *num_allocs;
+        double *card;
 };
 
-inline static Data *getData() {
+inline static Data *get_data() {
     static char buf[sizeof(Data)];
-    static Data *data = new (buf) Data;
+    static Data *data = new(buf) Data;
     return data;
 }
 
 extern "C" void *xxmalloc(size_t size) {
-    static void *(*realMalloc)(size_t) = nullptr;
-    static bool isDlsym = false;
-    static char *err = (char *) "libentroprise: ERROR: cannot dlsym malloc\n";
+    static void *(*real_malloc)(size_t) = nullptr;
+    static bool is_dlsym = false;
     static Data *data = nullptr;
-    int localNumAllocs;
-    double cardinality, entropy, maxEntropy, percentage;
     void *ptr;
 
-    if (isDlsym) { // If isDlsym, then this is a recursive call to malloc
+    if (is_dlsym) { // If isDlsym, then this is a recursive call to malloc
         return nullptr;
     }
-    if (realMalloc == nullptr) { // If realMalloc is null, then we need to interpose malloc
-        isDlsym = true;
-        realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
-        if (realMalloc == nullptr) { // Make sure dlsym worked
-            write(STDERR_FILENO, err, strlen(err));
+    if (real_malloc == nullptr) { // If realMalloc is null, then we need to interpose malloc
+        is_dlsym = true;
+        real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
+        is_dlsym = false;
+        if (real_malloc == nullptr) { // Make sure dlsym worked
+            tprintf::tprintf("libentroprise: ERROR: cannot dlsym malloc\n");
             exit(EXIT_FAILURE);
         }
-        isDlsym = false;
     }
-    data = getData(); // Fetch rest of data
 
-    ptr = realMalloc(size);
-    data->dataMtx.lock();
-    data->addrs.add((char *) &ptr, sizeof(void *));
-    data->numAllocs++;
-    if (data->numAllocs == data->nextIndex) { // Print data every power of two
-        data->nextIndex <<= 1;
-        localNumAllocs = data->numAllocs;
-        cardinality = data->addrs.estimate();
-        data->dataMtx.unlock();
-        maxEntropy = log(localNumAllocs) / log(2.0);
-        entropy = log(cardinality) / log(2.0);
-        if (maxEntropy == 0) {
-            percentage = 100;
-        } else {
-            percentage = entropy * 100.0 / maxEntropy;
-        }
-        data->writeMtx.lock();
-        tprintf::tprintf(
-            "libentroprise: Number of Allocations: @\n"
-            "libentroprise: Number of Unique Addresses: @\n"
-            "libentroprise: Calculated Entropy: @\n"
-            "libentroprise: Maximum Entropy: @\n"
-            "libentroprise: Percentage of Maximum: @%\n\n",
-            localNumAllocs, cardinality, entropy, maxEntropy, percentage
-        );
-        data->writeMtx.unlock();
-    } else {
-        data->dataMtx.unlock();
-    }
+    data = get_data(); // Fetch rest of data
+    ptr = real_malloc(size);
+    data->mtx.lock();
+    data->h.add((char *) &ptr, sizeof(void *));
+    // *(data->card) = data->h.estimate();
+    data->mtx.unlock();
+    *(data->num_allocs) = *(data->num_allocs) + 1;
     return ptr;
 }
 

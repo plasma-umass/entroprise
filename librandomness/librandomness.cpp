@@ -1,3 +1,5 @@
+#include <atomic>
+#include <new>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -9,30 +11,16 @@
 #include <string.h>
 #include <tprintf.h>
 
-// class Data {
-//     public:
-//         Data() {
-// 
-//         }
-// 
-// 
-//         static int fd, index = 0, *numAllocs;
-// };
-// 
-// inline static Data *getData() {
-//     static char buf[sizeof(Data)];
-//     static Data *data = new (buf) Data;
-//     return data;
-// }
-
 extern "C" void *xxmalloc(size_t size) {
     static void *(*realMalloc)(size_t) = nullptr;
     static bool hasDlsym = false;
-    static int fd, index = 0, *numAllocs;
+    static int fd, *numAllocs;
+    atomic<int> *blah;
     static void **addrs;
     static struct stat statBuf;
     static char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
     void *ptr;
+
     if (realMalloc == nullptr) {
         if (hasDlsym) { // For recursive call to malloc through dlsym -> calloc -> malloc
             return nullptr;
@@ -40,6 +28,7 @@ extern "C" void *xxmalloc(size_t size) {
         hasDlsym = true;
         realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
         hasDlsym = false;
+
         fd = open("addrs.bin", O_RDWR); // mmap to addrs.bin
         if (fd == -1) {
             write(STDERR_FILENO, err1, strlen(err1));
@@ -59,11 +48,13 @@ extern "C" void *xxmalloc(size_t size) {
             exit(EXIT_FAILURE);
         }
         *numAllocs = 0; // Initilize numAllocs to 0
+        blah = new (numAllocs) atomic<int>(0);
         addrs = (void **) (numAllocs + 1); // Point addrs to address immediately proceeding numAllocs
     }
+
     ptr = realMalloc(size);
-    *numAllocs = *numAllocs + 1; // Increment numAllocs
-    addrs[index++] = ptr; // Store address
+    addrs[numAllocs] = ptr; // Store address
+    numAllocs++; // Increment numAllocs
     #ifdef DEBUG
     tprintf::tprintf("@: malloc(@) = @\n", *numAllocs, size, ptr);
     #endif
