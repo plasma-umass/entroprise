@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include "hyperloglog.hpp"
 #include "proc.hh"
 
 extern char **environ;
@@ -13,12 +14,15 @@ int main(int argc, char *argv[]) {
 
     void *ptr;
     int num_allocs;
+    hll::HyperLogLog *h;
     double card, entropy, max, ratio;
 
     create_process(argv + 2, environ, argv[1]);
     ptr = get_proc_data();
     num_allocs = *((int *) ptr);
-    card = *((double *) ((int *) ptr + 1));
+    h = new((int *) ptr + 1) hll::HyperLogLog((char *) nullptr);
+    // h = (hll:: *) ((int *) ptr + 1);
+    card = h->estimate();
     entropy = log(card) / log(2.0);
     max = log(num_allocs) / log(2.0);
     ratio = entropy / max;
