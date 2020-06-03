@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
         p[i] = runs(addrs + i * seq_len, seq_len); // Perform a runs test on each sequence and save the p-value
     }
     d = ks(p, NUM_RUNS_TESTS); // Perform a KS test on the p-values
+    std::cout << "Number of Allocations: " << num_addrs << std::endl;
     if (D_ALPHA > d) {
  		std::cout << "ALLOCATOR IS POSSIBLY RANDOM" << std::endl;
     } else {

@@ -51,21 +51,21 @@ void *get_proc_data() {
     void *ptr;
     int fd;
     struct stat sbuf;
-    static char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
+    char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
 
     fd = open("addrs.bin", O_RDWR); // Open the same file that librandomness.so saved addresses to
     if (fd == -1) {
-        fatal();
+        fatal(err1);
     }
     if (fstat(fd, &sbuf) == -1) {
-        fatal();
+        fatal(err2);
     }
     ptr = mmap(nullptr, sbuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (ptr == MAP_FAILED) {
-        fatal();
+        fatal(err3);
     }
     if (madvise(ptr, sbuf.st_size, MADV_SEQUENTIAL) == -1) {
-        fatal();
+        fatal(err4);
     }
     return ptr;
 }

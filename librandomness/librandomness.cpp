@@ -1,14 +1,17 @@
 #include <atomic>
+#include <mutex>
 #include <new>
 #include <dlfcn.h>
 #include <tprintf.h>
+#include "proc.hh"
+#include "fatal.hh"
 
 class Data {
     public:
         Data() {
             void *map = get_proc_data();
             num_allocs = new(map) std::atomic<int>(0);
-            addrs = (void **) (numAllocs + 1); // Point addrs to address immediately proceeding numAllocs
+            addrs = (void **) (num_allocs + 1); // Point addrs to address immediately proceeding numAllocs
         }
 
         std::atomic<int> *num_allocs;
@@ -26,6 +29,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static bool is_dlsym = false;
     static Data *data;
     void *ptr;
+    int next;
 
     if (real_malloc == nullptr) {
         if (is_dlsym) { // For recursive call to malloc through dlsym -> calloc -> malloc
@@ -35,14 +39,14 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
         is_dlsym = false;
         if (real_malloc == nullptr) { // Make sure dlsym worked
-            fatal("libentroprise: ERROR: cannot dlsym malloc\n");
+            fatal((char *) "cannot dlsym malloc\n");
         }
     }
 
     data = get_data();
     ptr = real_malloc(size);
-    addrs[data->num_allocs->load()] = ptr; // TODO: add atomicity here
-    data->num_allocs->fetch_add(1); // Increment atomically
+    next = data->num_allocs->fetch_add(1); // Increment atomically
+    data->addrs[next] = ptr; // Add address atomically
     #ifdef RANDOMNESS_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
