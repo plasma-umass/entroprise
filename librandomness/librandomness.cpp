@@ -1,67 +1,58 @@
 #include <atomic>
 #include <new>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <stdlib.h>
 #include <dlfcn.h>
-#include <string.h>
 #include <tprintf.h>
 
-extern "C" void *xxmalloc(size_t size) {
-    static void *(*realMalloc)(size_t) = nullptr;
-    static bool hasDlsym = false;
-    static int fd, *numAllocs;
-    atomic<int> *blah;
-    static void **addrs;
-    static struct stat statBuf;
-    static char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
+class Data {
+    public:
+        Data() {
+            void *map = get_proc_data();
+            num_allocs = new(map) std::atomic<int>(0);
+            addrs = (void **) (numAllocs + 1); // Point addrs to address immediately proceeding numAllocs
+        }
+
+        std::atomic<int> *num_allocs;
+        void **addrs;
+};
+
+static __attribute__((always_inline)) Data *get_data() {
+    static char buf[sizeof(Data)];
+    static Data *data = new(buf) Data;
+    return data;
+}
+
+extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
+    static void *(*real_malloc)(size_t) = nullptr;
+    static bool is_dlsym = false;
+    static Data *data;
     void *ptr;
 
-    if (realMalloc == nullptr) {
-        if (hasDlsym) { // For recursive call to malloc through dlsym -> calloc -> malloc
+    if (real_malloc == nullptr) {
+        if (is_dlsym) { // For recursive call to malloc through dlsym -> calloc -> malloc
             return nullptr;
         }
-        hasDlsym = true;
-        realMalloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
-        hasDlsym = false;
-
-        fd = open("addrs.bin", O_RDWR); // mmap to addrs.bin
-        if (fd == -1) {
-            write(STDERR_FILENO, err1, strlen(err1));
-            exit(EXIT_FAILURE);
+        is_dlsym = true;
+        real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
+        is_dlsym = false;
+        if (real_malloc == nullptr) { // Make sure dlsym worked
+            fatal("libentroprise: ERROR: cannot dlsym malloc\n");
         }
-        if (fstat(fd, &statBuf) == -1) { // Determine size of file to mmap
-            write(STDERR_FILENO, err2, strlen(err2));
-            exit(EXIT_FAILURE);
-        }
-        numAllocs = (int *) mmap(NULL, statBuf.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-        if (numAllocs == MAP_FAILED) {
-            write(STDERR_FILENO, err3, strlen(err3));
-            exit(EXIT_FAILURE);
-        }
-        if (madvise(numAllocs, statBuf.st_size, MADV_SEQUENTIAL) == -1) {
-            write(STDERR_FILENO, err4, strlen(err4));
-            exit(EXIT_FAILURE);
-        }
-        *numAllocs = 0; // Initilize numAllocs to 0
-        blah = new (numAllocs) atomic<int>(0);
-        addrs = (void **) (numAllocs + 1); // Point addrs to address immediately proceeding numAllocs
     }
 
-    ptr = realMalloc(size);
-    addrs[numAllocs] = ptr; // Store address
-    numAllocs++; // Increment numAllocs
-    #ifdef DEBUG
-    tprintf::tprintf("@: malloc(@) = @\n", *numAllocs, size, ptr);
+    data = get_data();
+    ptr = real_malloc(size);
+    addrs[data->num_allocs->load()] = ptr; // TODO: add atomicity here
+    data->num_allocs->fetch_add(1); // Increment atomically
+    #ifdef RANDOMNESS_DEBUG
+    static std::mutex write_mtx;
+    write_mtx.lock();
+    tprintf::tprintf("@: malloc(@) = @\n", data->num_allocs->load(), size, ptr);
+    write_mtx.unlock();
     #endif
     return ptr;
 }
 
-extern "C" void xxfree(void *ptr) {
+extern "C" __attribute__((always_inline)) void xxfree(void *ptr) {
     static void (*real_free)(void *) = nullptr;
     if (real_free == nullptr) {
         real_free = (void (*)(void *)) dlsym(RTLD_NEXT, "free");
@@ -69,7 +60,7 @@ extern "C" void xxfree(void *ptr) {
     real_free(ptr);
 }
 
-extern "C" size_t xxmalloc_usable_size(void *ptr) {
+extern "C" __attribute__((always_inline)) size_t xxmalloc_usable_size(void *ptr) {
     static size_t (*real_malloc_usable_size)(void *) = nullptr;
     if (real_malloc_usable_size == nullptr) {
         real_malloc_usable_size = (size_t(*)(void *)) dlsym(RTLD_NEXT, "malloc_usable_size");
@@ -77,10 +68,10 @@ extern "C" size_t xxmalloc_usable_size(void *ptr) {
     return real_malloc_usable_size(ptr);
 }
 
-extern "C" void xxmalloc_lock(void) {
+extern "C" __attribute__((always_inline)) void xxmalloc_lock(void) {
     return;
 }
 
-extern "C" void xxmalloc_unlock(void) {
+extern "C" __attribute__((always_inline)) void xxmalloc_unlock(void) {
     return;
 }

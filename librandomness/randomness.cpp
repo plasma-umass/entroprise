@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     double p[NUM_RUNS_TESTS], d;
 
     create_process(argv + 2, environ, argv[1]);
-    addrs = (long unsigned int *) get_data();
+    addrs = (long unsigned int *) get_proc_data();
     num_addrs = *((int *) addrs); // The number of addresses is stored at the beginning of the mapping
     addrs = (long unsigned int *) ((int *) addrs + 1); // Following the number of addresses are the addresses themselves
     seq_len = ceil(num_addrs / NUM_RUNS_TESTS); // The number of allocations for each runs test

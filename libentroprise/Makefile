@@ -1,4 +1,4 @@
-CPPFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -DNDEBUG -fvisibility=hidden
+CPPFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -DNENTROPRISE_DEBUG -fvisibility=hidden
 CXX = clang++
 LIBNAME = entroprise
 HLDIR = /home/msteranka/Heap-Layers

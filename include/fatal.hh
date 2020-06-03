@@ -1,11 +1,12 @@
 #ifndef __FATAL_HH
 #define __FATAL_HH
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
+#include <unistd.h>
 
-void fatal() {
-    perror("ERROR");
+void fatal(char *msg) {
+    write(STDERR_FILENO, msg, strlen(msg));
     exit(EXIT_FAILURE);
 }
 

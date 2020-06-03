@@ -6,6 +6,7 @@
 #include "hyperloglog.hpp"
 #include "tprintf.h"
 #include "proc.hh"
+#include "fatal.hh"
 
 /* 
     * HYPERLOGLOG MODIFICATIONS:
@@ -28,7 +29,7 @@ class Data {
         std::mutex mtx;
 };
 
-inline static Data *get_data() {
+static __attribute__((always_inline)) Data *get_data() {
     static char buf[sizeof(Data)];
     static Data *data = new(buf) Data;
     return data;
@@ -40,16 +41,15 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static Data *data = nullptr;
     void *ptr;
 
-    if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
-        return nullptr;
-    }
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
+        if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
+            return nullptr;
+        }
         is_dlsym = true;
         real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
         is_dlsym = false;
         if (real_malloc == nullptr) { // Make sure dlsym worked
-            tprintf::tprintf("libentroprise: ERROR: cannot dlsym malloc\n");
-            exit(EXIT_FAILURE);
+            fatal("libentroprise: ERROR: cannot dlsym malloc\n");
         }
     }
 

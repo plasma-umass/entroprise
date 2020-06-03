@@ -51,6 +51,7 @@ void *get_proc_data() {
     void *ptr;
     int fd;
     struct stat sbuf;
+    static char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
 
     fd = open("addrs.bin", O_RDWR); // Open the same file that librandomness.so saved addresses to
     if (fd == -1) {
