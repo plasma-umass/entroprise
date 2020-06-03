@@ -21,7 +21,6 @@ int main(int argc, char *argv[]) {
     ptr = get_proc_data();
     num_allocs = *((int *) ptr);
     h = new((int *) ptr + 1) hll::HyperLogLog((char *) nullptr);
-    // h = (hll:: *) ((int *) ptr + 1);
     card = h->estimate();
     entropy = log(card) / log(2.0);
     max = log(num_allocs) / log(2.0);

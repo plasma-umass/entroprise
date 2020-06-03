@@ -50,7 +50,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
         is_dlsym = false;
         if (real_malloc == nullptr) { // Make sure dlsym worked
-            fatal("libentroprise: ERROR: cannot dlsym malloc\n");
+            fatal((char *) "cannot dlsym malloc\n");
         }
     }
 

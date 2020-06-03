@@ -1,4 +1,4 @@
-CXXFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -O2 -DNRANDOMNESS_DEBUG -fvisibility=hidden
+CXXFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -O2 -DNRANDOMNESS_DEBUG -DNRANDOMNESS_BACKTRACE -fvisibility=hidden
 CXX = clang++
 LIBNAME = randomness
 HLDIR = /home/msteranka/Heap-Layers

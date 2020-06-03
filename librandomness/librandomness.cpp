@@ -5,6 +5,23 @@
 #include <tprintf.h>
 #include "proc.hh"
 #include "fatal.hh"
+#ifdef RANDOMNESS_BACKTRACE
+#include <cstdlib>
+#include <execinfo.h>
+#include <signal.h>
+#endif
+
+#ifdef RANDOMNESS_BACKTRACE
+
+void handler(int sig) {
+    tprintf::tprintf("shit\n");
+    void *buf[20];
+    int backtrace_size = backtrace(buf, 20);
+    backtrace_symbols_fd(buf, backtrace_size, STDERR_FILENO);
+    exit(EXIT_FAILURE);
+}
+
+#endif
 
 class Data {
     public:
@@ -41,6 +58,15 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         if (real_malloc == nullptr) { // Make sure dlsym worked
             fatal((char *) "cannot dlsym malloc\n");
         }
+
+        #ifdef RANDOMNESS_BACKTRACE
+        if (signal(SIGSEGV, handler) == SIG_ERR) {
+            fatal((char *) "could not signal SIGSEGV\n");
+        }
+        if (signal(SIGINT, handler) == SIG_ERR) {
+            fatal((char *) "could not signal SIGINT\n");
+        }
+        #endif
     }
 
     data = get_data();

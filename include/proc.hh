@@ -1,7 +1,7 @@
 #ifndef __MAP_HH
 #define __MAP_HH
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/wait.h>
