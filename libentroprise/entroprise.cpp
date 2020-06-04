@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     }
 
     char c;
-    const int MAX_ADDRS = 10000, DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
+    const int MAX_ADDRS = 100000, DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
     void *ptr;
     int fd, num_allocs, seq_len;
     hll::HyperLogLog *h;
@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
     const int NUM_RUNS_TESTS = 100;
     const double D_ALPHA = 0.565;
     double p[NUM_RUNS_TESTS], d;
+    int runs_data[NUM_RUNS_TESTS][3];
 
     c = '\0';
     fd = open(FILE_NAME, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); // Open file that will store data
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     seq_len = ceil(num_allocs / NUM_RUNS_TESTS); // The number of allocations for each runs test
     for (int i = 0; i < NUM_RUNS_TESTS; i++) {
-        p[i] = runs(addrs + i * seq_len, seq_len); // Perform a runs test on each sequence and save the p-value
+        p[i] = runs(addrs + i * seq_len, seq_len, runs_data[i]); // Perform a runs test on each sequence and save the p-value
     }
     d = ks(p, NUM_RUNS_TESTS); // Perform a KS test on the p-values
 
@@ -76,6 +77,10 @@ int main(int argc, char *argv[]) {
             cout << "0";
         }
         cout << i + 1 << ": p-value = " << p[i] << endl;
+        cout << "\t\tnum_plus = " << runs_data[i][0] << endl;
+        cout << "\t\tnum_neg = " << runs_data[i][1] << endl;
+        cout << "\t\tnum_runs = " << runs_data[i][2] << endl;
+
     }
     cout << endl << "KOLMOGOROV-SMIRNOV TEST RESULTS:" << endl;
     cout << "\tD = " << d << endl;

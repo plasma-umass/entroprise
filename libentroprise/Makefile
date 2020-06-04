@@ -19,6 +19,3 @@ test:
 
 Heap-Layers:
 	git clone https://github.com/emeryberger/Heap-Layers
-
-HyperLogLog:
-	git clone https://github.com/hideo55/cpp-HyperLogLog

@@ -14,6 +14,7 @@
 
 /* 
     * HYPERLOGLOG MODIFICATIONS:
+    (https://github.com/hideo55/cpp-HyperLogLog)
     
     * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
     * Replace vector init with memset in HLL constructor

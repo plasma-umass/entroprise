@@ -54,7 +54,7 @@ double table[410] = {
 void printRuns(long unsigned int a[], const int N, long unsigned int median);
 double bigMultiply(double f1, double f2);
 
-double runs(long unsigned int a[], const int N) {
+double runs(long unsigned int a[], const int N, int runs_data[3]) {
 	long unsigned int tmp[N];
 	std::copy(a, a + N, tmp);
 	std::sort(tmp, tmp + N);
@@ -76,6 +76,10 @@ double runs(long unsigned int a[], const int N) {
 			++nRuns;	
 		}
 	}
+
+    runs_data[0] = nPlus;
+    runs_data[1] = nNeg;
+    runs_data[2] = nRuns;
 
 	if (nPlus == 0 || nNeg == 0) { // Will cause division by zero
 		return 0;
