@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include "fatal.hh"
+#define FILE_NAME ".addrs.bin"
+#include <cstdio>
 
 /*
     * create_process
@@ -53,7 +55,7 @@ void *get_proc_data() {
     struct stat sbuf;
     char *err1 = (char *) "open failed\n", *err2 = (char *) "fstat failed\n", *err3 = (char *) "mmap failed\n", *err4 = (char *) "madvise failed\n";
 
-    fd = open("addrs.bin", O_RDWR); // Open the same file that librandomness.so saved addresses to
+    fd = open(FILE_NAME, O_RDWR); // Open the same file that librandomness.so saved addresses to
     if (fd == -1) {
         fatal(err1);
     }

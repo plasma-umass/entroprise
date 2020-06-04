@@ -1,5 +1,5 @@
-#include <mutex>
 #include <atomic>
+#include <mutex>
 #include <new>
 #include <cstdlib>
 #include <dlfcn.h>
@@ -7,6 +7,10 @@
 #include "tprintf.h"
 #include "proc.hh"
 #include "fatal.hh"
+#ifdef ENTROPRISE_BACKTRACE
+#include <execinfo.h>
+#include <signal.h>
+#endif
 
 /* 
     * HYPERLOGLOG MODIFICATIONS:
@@ -15,7 +19,20 @@
     * Replace vector init with memset in HLL constructor
     * Comment out every method but add and estimate
     * Add a constructor that takes a char * and does nothing
+
+    * MAKE SURE addrs.bin IS LARGE ENOUGH
 */
+
+#ifdef ENTROPRISE_BACKTRACE
+
+void handler(int sig) {
+    void *buf[20];
+    int backtrace_size = backtrace(buf, 20);
+    backtrace_symbols_fd(buf, backtrace_size, STDERR_FILENO);
+    exit(EXIT_FAILURE);
+}
+
+#endif
 
 class Data {
     public:
@@ -23,10 +40,12 @@ class Data {
             void *map = get_proc_data();
             num_allocs = new(map) std::atomic<int>(0);
             h = new(num_allocs + 1) hll::HyperLogLog;
+            addrs = (void **) (h + 1);
         }
 
         std::atomic<int> *num_allocs;
         hll::HyperLogLog *h;
+        void **addrs;
         std::mutex mtx;
 };
 
@@ -41,6 +60,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static bool is_dlsym = false;
     static Data *data = nullptr;
     void *ptr;
+    int next_addr;
 
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
         if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
@@ -52,6 +72,15 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         if (real_malloc == nullptr) { // Make sure dlsym worked
             fatal((char *) "cannot dlsym malloc\n");
         }
+
+        #ifdef ENTROPRISE_BACKTRACE
+        if (signal(SIGSEGV, handler) == SIG_ERR) {
+            fatal((char *) "could not signal SIGSEGV\n");
+        }
+        if (signal(SIGINT, handler) == SIG_ERR) {
+            fatal((char *) "could not signal SIGINT\n");
+        }
+        #endif
     }
 
     data = get_data(); // Fetch rest of data
@@ -59,7 +88,8 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     data->mtx.lock();
     data->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
     data->mtx.unlock();
-    data->num_allocs->fetch_add(1); // Increment atomically
+    next_addr = data->num_allocs->fetch_add(1); // Increment atomically
+    data->addrs[next_addr] = ptr; // Add address atomically
     #ifdef ENTROPRISE_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
