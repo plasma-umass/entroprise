@@ -9,10 +9,10 @@
 
 class Data {
     public:
-        Data() : num_allocs(0), num_live(0) {};
+        Data() {};
 
-        std::atomic<int> num_allocs;
-        std::atomic<int> num_live;
+        int num_allocs = 0, num_live = 0, next = 1;
+        std::mutex mtx;
 };
 
 static __attribute__((always_inline)) Data *get_data() {
@@ -26,7 +26,6 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static bool is_dlsym = false;
     static Data *data = nullptr;
     void *ptr;
-    int local_num_allocs, local_num_live;
 
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
         if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
@@ -42,11 +41,18 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
 
     data = get_data(); // Fetch rest of data
     ptr = real_malloc(size);
-    data->num_allocs.fetch_add(1);
-    data->num_live.fetch_add(1);
-    local_num_allocs = data->num_allocs.load();
-    local_num_live = data->num_live.load();
-    tprintf::tprintf("num_allocs = @, num_live = @, reuse = @\n", local_num_allocs, local_num_live, (double) local_num_allocs / local_num_live);
+    data->mtx.lock();
+    data->num_allocs++;
+    data->num_live++;
+    if (data->num_allocs == data->next) {
+        if (data->num_live == 0) {
+            tprintf::tprintf("num_allocs = @, num_live = @, reuse = inf\n", data->num_allocs, data->num_live);
+        } else {
+            tprintf::tprintf("num_allocs = @, num_live = @, reuse = @\n", data->num_allocs, data->num_live, (double) data->num_allocs / data->num_live);
+        }
+        data->next <<= 1;
+    }
+    data->mtx.unlock();
     return ptr;
 }
 
@@ -57,7 +63,9 @@ extern "C" __attribute__((always_inline)) void xxfree(void *ptr) {
         real_free = (void (*)(void *)) dlsym(RTLD_NEXT, "free");
     }
     data = get_data();
-    data->num_live.fetch_add(-1);
+    data->mtx.lock();
+    data->num_live--;
+    data->mtx.unlock();
     real_free(ptr);
 }
 

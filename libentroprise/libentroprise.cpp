@@ -90,7 +90,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     data->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
     data->mtx.unlock();
     next_addr = data->num_allocs->fetch_add(1); // Increment atomically
-    data->addrs[next_addr] = ptr; // Add address atomically
+    data->addrs[next_addr] = ptr; // TODO: is this atomic?
     #ifdef ENTROPRISE_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
