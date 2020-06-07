@@ -13,13 +13,13 @@
 extern char **environ;
 
 int main(int argc, char *argv[]) {
-    if (argc < 3) {
-        fprintf(stderr, "usage <ld_preload> <exec>\n");
+    if (argc < 4) {
+        fprintf(stderr, "usage <num_allocs> <ld_preload> <exec>\n");
         return EXIT_FAILURE;
     }
 
     char c;
-    const int MAX_ADDRS = 100000, DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
+    const int MAX_ADDRS = std::stoi(argv[1]), DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
     void *ptr;
     int fd, num_allocs, seq_len;
     hll::HyperLogLog *h;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
     close(fd);
 
-    create_process(argv + 2, environ, argv[1]);
+    create_process(argv + 3, environ, argv[2]);
     ptr = get_proc_data();
 
     num_allocs = *((int *) ptr);
