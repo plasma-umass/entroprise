@@ -1,17 +1,22 @@
-#include <atomic>
 #include <mutex>
 #include <new>
 #include <cstdlib>
 #include <dlfcn.h>
-#include "tprintf.h"
 #include "proc.hh"
 #include "fatal.hh"
 
 class Data {
     public:
-        Data() {};
+        Data() {
+            void *ptr = get_proc_data();
+            num_allocs = (int *) ptr;
+            max_num_live = num_allocs + 1;
+            *num_allocs = 0;
+            num_live = 0;
+            *max_num_live = 0;
+        };
 
-        int num_allocs = 0, num_live = 0, next = 1;
+        int *num_allocs, num_live, *max_num_live;
         std::mutex mtx;
 };
 
@@ -42,16 +47,9 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     data = get_data(); // Fetch rest of data
     ptr = real_malloc(size);
     data->mtx.lock();
-    data->num_allocs++;
+    *(data->num_allocs) += 1;
     data->num_live++;
-    if (data->num_allocs == data->next) {
-        if (data->num_live == 0) {
-            tprintf::tprintf("num_allocs = @, num_live = @, reuse = inf\n", data->num_allocs, data->num_live);
-        } else {
-            tprintf::tprintf("num_allocs = @, num_live = @, reuse = @\n", data->num_allocs, data->num_live, (double) data->num_allocs / data->num_live);
-        }
-        data->next <<= 1;
-    }
+    *(data->max_num_live) = std::max(*(data->max_num_live), data->num_live);
     data->mtx.unlock();
     return ptr;
 }

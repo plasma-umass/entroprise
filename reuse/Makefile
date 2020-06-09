@@ -12,3 +12,6 @@ all: $(LINUX_SRC)
 
 Heap-Layers:
 	git clone https://github.com/emeryberger/Heap-Layers
+
+reuse:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o reuse reuse.cpp
