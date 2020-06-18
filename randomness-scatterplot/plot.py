@@ -36,7 +36,7 @@ Benchmark parameters:
 """
 bench_params = {
     # 'blackscholes': (0,),
-    'bodytrack': (1, 0, 0.01),
+    'bodytrack': (1000, 1000000, 0.2, 10),
     # 'canneal': (2,),
     # 'dedup': (3,),
     # 'facesim': (4,),
@@ -44,7 +44,7 @@ bench_params = {
     # 'fluidanimate': (6,),
     # 'freqmine': (7,),
     # 'raytrace': (8,),
-    'streamcluster': (100, 100000, 0.2),
+    'streamcluster': (500, 100000, 0.2, 25),
     'swaptions': (10,),
     'vips': (11,),
 }
@@ -52,8 +52,9 @@ params = bench_params[args.bench]
 x_mod = params[0]
 y_mod = params[1]
 opacity = params[2]
+dot_size = params[3]
 data_path = root + '/' + args.alloc + '/.' + args.bench + '-' + args.alloc + '-entroprise-data'
-plt_title = args.alloc + ' ' + args.bench + ' Randomness'
+plt_title = args.alloc + ' ' + args.bench + ' randomness'
 plt_file_name = args.alloc + '-' + args.bench + '.png'
 x_label = 'Iteration'
 y_label = 'Address'
@@ -71,8 +72,8 @@ for i in range(0, len(addrs)):
 y = []
 for i in range(0, len(addrs)):
     y.append(addrs[i] % y_mod)
-# plt.xlim((0, x_mod))
-# plt.ylim((0, y_mod))
-ax.scatter(x, y, s=75, alpha=opacity)
+plt.xlim((-0.05 * x_mod, 1.05 * x_mod))
+plt.ylim((-0.05 * y_mod, 1.05 * y_mod))
+ax.scatter(x, y, s=dot_size, alpha=opacity)
 plt.savefig(plt_file_name, bbox_inches='tight')
-print('Figure successfully saved')
+print('Successfully created ' + plt_file_name)
