@@ -19,6 +19,7 @@ def get_addrs(input_file):
     for i in range(start, end, 8):
         cur = struct.unpack('<Q', buf[i:i+8])[0]
         addrs.append(cur)
+    assert (len(addrs) == num_addrs),"len(addrs) != num_addrs"
     return addrs
 
 p = argparse.ArgumentParser()
@@ -36,7 +37,7 @@ Benchmark parameters:
 """
 bench_params = {
     # 'blackscholes': (0,),
-    'bodytrack': (1000, 1000000, 0.2, 10),
+    'bodytrack': (50000, 100000, 0.05, 5),
     # 'canneal': (2,),
     # 'dedup': (3,),
     # 'facesim': (4,),
@@ -45,8 +46,8 @@ bench_params = {
     # 'freqmine': (7,),
     # 'raytrace': (8,),
     'streamcluster': (500, 100000, 0.2, 25),
-    'swaptions': (10,),
-    'vips': (11,),
+    'swaptions': (20000000, 1000000, 0.005, 0.1),
+    'vips': (50000, 100000, 0.025, 1),
 }
 params = bench_params[args.bench]
 x_mod = params[0]
@@ -76,4 +77,4 @@ plt.xlim((-0.05 * x_mod, 1.05 * x_mod))
 plt.ylim((-0.05 * y_mod, 1.05 * y_mod))
 ax.scatter(x, y, s=dot_size, alpha=opacity)
 plt.savefig(plt_file_name, bbox_inches='tight')
-print('Successfully created ' + plt_file_name)
+print('Successfully created ' + plt_file_name + ', Number of Allocations: ' + str(len(addrs)))
