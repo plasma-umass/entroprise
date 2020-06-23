@@ -22,6 +22,15 @@ def get_addrs(input_file):
     assert (len(addrs) == num_addrs),"len(addrs) != num_addrs"
     return addrs
 
+def shuffle_addrs(a, end):
+    n = len(a)
+    for i in range(0, end - 2):
+        r = random.randint(i, n - 1)
+        tmp = a[i]
+        a[i] = a[r]
+        a[r] = tmp
+    return a[:end]
+
 p = argparse.ArgumentParser()
 p.add_argument("alloc", type=str, help="allocator")
 p.add_argument("bench", type=str, help="benchmark")
@@ -35,9 +44,9 @@ Benchmark parameters:
     - dot opacity
     - dot size
 """
-bench_params = {
+# bench_params = {
     # 'blackscholes': (0,),
-    'bodytrack': (50000, 100000, 0.05, 5),
+    # 'bodytrack': (50000, 100000, 0.05, 5),
     # 'canneal': (2,),
     # 'dedup': (3,),
     # 'facesim': (4,),
@@ -45,11 +54,12 @@ bench_params = {
     # 'fluidanimate': (6,),
     # 'freqmine': (7,),
     # 'raytrace': (8,),
-    'streamcluster': (500, 100000, 0.2, 25),
-    'swaptions': (20000000, 1000000, 0.005, 0.1),
-    'vips': (50000, 100000, 0.025, 1),
-}
-params = bench_params[args.bench]
+    # 'streamcluster': (500, 100000, 0.2, 25),
+    # 'swaptions': (20000000, 1000000, 0.01, 0.25),
+    # 'vips': (50000, 100000, 0.025, 1),
+# }
+# params = bench_params[args.bench]
+params = (500, 100000, 0.2, 25)
 x_mod = params[0]
 y_mod = params[1]
 opacity = params[2]
@@ -59,7 +69,9 @@ plt_title = args.alloc + ' ' + args.bench + ' randomness'
 plt_file_name = args.alloc + '-' + args.bench + '.png'
 x_label = 'Iteration'
 y_label = 'Address'
-addrs = get_addrs(data_path)
+# addrs = get_addrs(data_path)
+# 8893 is the minimum number of allocations occuring across all benchmarks of interest (streamcluster, bodytrack, vips, swaptions)
+addrs = shuffle_addrs(get_addrs(data_path), 8893)
 
 fig, ax = plt.subplots(figsize=(15,10))
 plt.title(plt_title, fontsize=32)
@@ -77,4 +89,5 @@ plt.xlim((-0.05 * x_mod, 1.05 * x_mod))
 plt.ylim((-0.05 * y_mod, 1.05 * y_mod))
 ax.scatter(x, y, s=dot_size, alpha=opacity)
 plt.savefig(plt_file_name, bbox_inches='tight')
-print('Successfully created ' + plt_file_name + ', Number of Allocations: ' + str(len(addrs)))
+# print('Successfully created ' + plt_file_name + ', Number of Allocations: ' + str(len(addrs)))
+print('Successfully created ' + plt_file_name)
