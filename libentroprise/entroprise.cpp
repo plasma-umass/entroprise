@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    char c;
     const int MAX_ADDRS = std::stoi(argv[1]), DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
     void *ptr;
     int fd, num_allocs, seq_len;
@@ -29,19 +28,6 @@ int main(int argc, char *argv[]) {
     const double D_ALPHA = 0.565;
     double p[NUM_RUNS_TESTS], d;
     int runs_data[NUM_RUNS_TESTS][3];
-
-    c = '\0';
-    fd = open(FILE_NAME, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); // Open file that will store data
-    if (fd == -1) {
-        fatal();
-    }
-    if (lseek(fd, DEFAULT_FILE_SIZE - 1, SEEK_SET) == -1) {
-        fatal();
-    }
-    if (write(fd, &c, 1) == -1)  { // lseek + write to increase the size of the file so that it can be used to sufficiently store all data
-        fatal();
-    }
-    close(fd);
 
     create_process(argv + 3, environ, argv[2]);
     ptr = get_proc_data();
