@@ -2,7 +2,11 @@
 #include <mutex>
 #include <new>
 #include <cstdlib>
+#include <cstdio>
+#include <unordered_map>
+#include <heaplayers>
 #include <dlfcn.h>
+#include <pthread.h>
 #include "hyperloglog.hpp"
 #include "tprintf.h"
 #include "proc.hh"
@@ -21,7 +25,7 @@
     * Comment out every method but add and estimate
     * Add a constructor that takes a char * and does nothing
 
-    * MAKE SURE addrs.bin IS LARGE ENOUGH
+    * MAKE SURE .addrs.bin IS LARGE ENOUGH
 */
 
 #ifdef ENTROPRISE_BACKTRACE
@@ -35,33 +39,50 @@ void handler(int sig) {
 
 #endif
 
-class Data {
+class ThreadData {
     public:
-        Data() {
-            void *map = get_proc_data();
-            num_allocs = new(map) std::atomic<int>(0);
+        ThreadData(int tid) { 
+            char fname[100];
+            const unsigned int INIT_ADDRS = 8192, INIT_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * INIT_ADDRS;
+            snprintf(fname, 100, "%d.threads.bin", tid);
+            create_thread_data(&fd, &map, fname, INIT_SIZE);
+            num_allocs = (int *) map;
+            *num_allocs = 0;
+            addrs_cap = INIT_ADDRS;
             h = new(num_allocs + 1) hll::HyperLogLog;
             addrs = (void **) (h + 1);
         }
 
-        std::atomic<int> *num_allocs;
+        void *map;
+        int *num_allocs, capacity, fd, addrs_cap;
         hll::HyperLogLog *h;
         void **addrs;
-        std::mutex mtx;
 };
 
-static __attribute__((always_inline)) Data *get_data() {
-    static char buf[sizeof(Data)];
-    static Data *data = new(buf) Data;
+// Custom HeapLayers allocator that unordered_map allocates from
+template <typename T>
+class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
+
+class GlobalData {
+    public:
+        GlobalData() : num_threads(0) {}
+        std::unordered_map<pthread_t, ThreadData, std::hash<pthread_t>, equal_to<pthread_t>, MyAllocator<pair<pthread_t, ThreadData>>> m;
+        std::atomic<int> num_threads;
+};
+
+static __attribute__((always_inline)) GlobalData *get_global_data() {
+    static char buf[sizeof(GlobalData)];
+    static GlobalData *data = new(buf) GlobalData;
     return data;
 }
 
 extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static void *(*real_malloc)(size_t) = nullptr;
     static bool is_dlsym = false;
-    static Data *data = nullptr;
+    static GlobalData *gdata = nullptr;
     void *ptr;
-    int next_addr;
+    pthread_t tid;
+    ThreadData *tdata;
 
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
         if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
@@ -84,13 +105,23 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         #endif
     }
 
-    data = get_data(); // Fetch rest of data
+    gdata = get_global_data(); // Fetch rest of data
     ptr = real_malloc(size);
-    data->mtx.lock();
-    data->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
-    data->mtx.unlock();
-    next_addr = data->num_allocs->fetch_add(1); // Increment atomically
-    data->addrs[next_addr] = ptr; // TODO: is this atomic?
+    tid = pthread_self();
+    if (gdata->m.find(tid) == gdata->m.end()) {
+        int n = gdata->num_threads.fetch_add(1);
+        gdata->m.emplace(tid, n);
+    }
+    tdata = &(gdata->m.find(tid)->second); // Fetch this thread's data
+    tdata->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
+    if (*(tdata->num_allocs) == tdata->addrs_cap) {
+        int old_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap;
+        int new_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap * 2;
+        tdata->map = extend_data(tdata->fd, tdata->map, old_sz, new_sz); // FIX EXTEND_DATA
+        tdata->addrs_cap *= 2;
+    }
+    tdata->addrs[*(tdata->num_allocs)] = ptr; // Add address to list of addresses
+    *(tdata->num_allocs) = *(tdata->num_allocs) + 1; // Increment number of allocations
     #ifdef ENTROPRISE_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
