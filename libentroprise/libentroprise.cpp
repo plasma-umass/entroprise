@@ -51,23 +51,31 @@ class ThreadData {
             addrs_cap = INIT_ADDRS;
             h = new(num_allocs + 1) hll::HyperLogLog;
             addrs = (void **) (h + 1);
+            this->tid = tid;
         }
 
         void *map;
         int *num_allocs, capacity, fd, addrs_cap;
         hll::HyperLogLog *h;
         void **addrs;
+        int tid;
 };
 
 // Custom HeapLayers allocator that unordered_map allocates from
 template <typename T>
 class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
+// class MyAllocator : public STLAllocator<T, LockedHeap<std::mutex, FreelistHeap<BumpAlloc<4096, MmapHeap>>>> {};
 
 class GlobalData {
     public:
-        GlobalData() : num_threads(0) {}
+        // GlobalData() : num_threads(0) {}
+        GlobalData() {
+            num_threads = 0;
+        }
+
         std::unordered_map<pthread_t, ThreadData, std::hash<pthread_t>, equal_to<pthread_t>, MyAllocator<pair<pthread_t, ThreadData>>> m;
-        std::atomic<int> num_threads;
+        // std::atomic<int> num_threads;
+        int num_threads;
 };
 
 static __attribute__((always_inline)) GlobalData *get_global_data() {
@@ -81,6 +89,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     static bool is_dlsym = false;
     static GlobalData *gdata = nullptr;
     void *ptr;
+    static std::mutex mtx;
     pthread_t tid;
     ThreadData *tdata;
 
@@ -108,16 +117,22 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     gdata = get_global_data(); // Fetch rest of data
     ptr = real_malloc(size);
     tid = pthread_self();
+    mtx.lock();
     if (gdata->m.find(tid) == gdata->m.end()) {
-        int n = gdata->num_threads.fetch_add(1);
+        // int n = gdata->num_threads.fetch_add(1);
+        int n = gdata->num_threads++;
         gdata->m.emplace(tid, n);
     }
     tdata = &(gdata->m.find(tid)->second); // Fetch this thread's data
+    mtx.unlock();
     tdata->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
     if (*(tdata->num_allocs) == tdata->addrs_cap) {
         int old_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap;
         int new_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap * 2;
-        tdata->map = extend_data(tdata->fd, tdata->map, old_sz, new_sz); // FIX EXTEND_DATA
+        tdata->map = extend_data(tdata->fd, tdata->map, old_sz, new_sz);
+        tdata->num_allocs = (int *) tdata->map;
+        tdata->h = new(tdata->num_allocs + 1) hll::HyperLogLog((char *) nullptr);
+        tdata->addrs = (void **) (tdata->h + 1);
         tdata->addrs_cap *= 2;
     }
     tdata->addrs[*(tdata->num_allocs)] = ptr; // Add address to list of addresses
@@ -125,7 +140,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     #ifdef ENTROPRISE_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
-    tprintf::tprintf("@: malloc(@) = @\n", data->num_allocs->load(), size, ptr);
+    tprintf::tprintf("Thread @; @ Allocations; malloc(@) = @\n", tdata->tid, *(tdata->num_allocs), size, ptr);
     write_mtx.unlock();
     #endif
     return ptr;

@@ -120,11 +120,6 @@ std::vector<ParsedThreadData> *get_child_data() {
 void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
     void *ptr;
     char c = '\0', *err1 = (char *) "extend_data(): munmap failed\n", *err2 = (char *) "extend_data(): lseek failed\n", *err3 = (char *) "extend_data(): write failed\n", *err4 = (char *) "extend_data(): mmap failed\n", *err5 = (char *) "extend_data(): madvise failed\n";
-    if (map != nullptr && OLD_SIZE != -1) {
-        if (munmap(map, OLD_SIZE) == -1) {
-            fatal(err1);
-        }
-    }
     if (lseek(fd, NEW_SIZE, SEEK_SET) == -1) {
         fatal(err2);
     }
@@ -137,6 +132,12 @@ void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
     }
     if (madvise(ptr, NEW_SIZE, MADV_SEQUENTIAL) == -1) {
         fatal(err5);
+    }
+    if (map != nullptr && OLD_SIZE != -1) {
+        memcpy(ptr, map, OLD_SIZE);
+        if (munmap(map, OLD_SIZE) == -1) {
+            fatal(err1);
+        }
     }
     return ptr;
 }
