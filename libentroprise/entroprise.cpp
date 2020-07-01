@@ -11,13 +11,33 @@
 #include "runs.hh"
 #include "ks.hh"
 
-extern char **environ;
+bool parse_args(int argc, char *argv[], std::string *alloc, int *exec_i) {
+    if (argc < 2) {
+        return false;
+    } else if (strncmp(argv[1], "-a", std::min(strlen(argv[1]), strlen("-a"))) == 0) {
+        if (argc < 4) {
+            return false;
+        }
+        alloc->assign(argv[2]);
+        *(exec_i) = 3;
+        return (access(alloc->c_str(), F_OK) != -1 && access(argv[*exec_i], F_OK) != -1);
+    } else {
+        *exec_i = 1;
+        return (access(argv[*exec_i], F_OK) != -1);
+    }
+}
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "usage <num_allocs> <ld_preload> <exec>\n");
+    std::string alloc;
+    int exec_i;
+    if (!parse_args(argc, argv, &alloc, &exec_i)) {
+        std::cerr << "usage -a <alloc> <exec>" << std::endl;
         return EXIT_FAILURE;
     }
+    // if (argc < 4) {
+    //     fprintf(stderr, "usage <num_allocs> <ld_preload> <exec>\n");
+    //     return EXIT_FAILURE;
+    // }
 
     // const int MAX_ADDRS = std::stoi(argv[1]), DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
     // void *ptr;
@@ -36,14 +56,19 @@ int main(int argc, char *argv[]) {
     ParsedThreadData *cur;
 
     for (int i = 0; true; i++) {
-        snprintf(fname, 100, "%d.threads.bin", i);
+        snprintf(fname, 100, THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
         if (access(fname, F_OK) == -1) {
             break;
         }
         unlink(fname);
     }
 
-    create_process(argv + 3, environ, argv[2]);
+    // create_process(argv + 3, argv[2]);
+    if (alloc.size() == 0) {
+        create_proc(argv + exec_i, nullptr);
+    } else {
+        create_proc(argv + exec_i, (char *) alloc.c_str());
+    }
     tdata = get_child_data();
 
     // num_allocs = *((int *) ptr);
@@ -97,7 +122,7 @@ int main(int argc, char *argv[]) {
  	// 	cout << "\tALLOCATOR IS NOT RANDOM" << endl;
     // }
 
-    cout << endl << "ENTROPRISE RESULTS" << endl;
+    cout << endl << endl << "ENTROPRISE RESULTS" << endl;
     cout << "------------------------------------------------------------" << endl;
     if (tdata->size() == 0) {
         cout << "No data available. malloc was never called.\n" << endl;
@@ -164,7 +189,7 @@ int main(int argc, char *argv[]) {
     cout << "\tNumber of Allocations Standard Deviation: " << std_dev_num_allocs << endl;
     cout << "\tNormalized Entropy Standard Deviation: " << std_dev_normal << endl;
     cout << endl;
-    cout << "\t" << num_random << " / " << tdata->size() << " Random Sequences" << endl;
+    cout << "\t" << num_random << " / " << tdata->size() << " Random Sequences" << endl << endl;
 
     return EXIT_SUCCESS;
 }

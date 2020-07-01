@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cstdio>
 #include <vector>
 #include <unistd.h>
 #include <fcntl.h>
@@ -17,7 +18,8 @@
 #include "ks.hh"
 // #define FILE_NAME ".addrs.bin"
 #define FILE_NAME "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/.entroprise-data.bin"
-#include <cstdio>
+#define THREAD_FILE_PREFIX "."
+#define THREAD_FILE_POSTFIX ".threads.bin"
 
 static const int NUM_RUNS_TESTS = 100;
 static const double D_ALPHA = 0.565;
@@ -66,23 +68,50 @@ class ParsedThreadData {
     * alloc: the allocator to run the process with in the format "LD_PRELOAD=/path/to/allocator.so"
 */
 
-void create_process(char **argv, char** env, char *alloc) {
-    char **new_env;
+void create_proc(char **argv, char *alloc) {
+    extern char **environ;
+    char **new_env, cwd[256];
     int i;
+    std::string str;
+
+    if (getcwd(cwd, 256) == nullptr) {
+        fatal();
+    }
+    str.assign(cwd);
+    str.append("/libentroprise.so");
+    if (access(str.c_str(), F_OK) == -1) {
+        fatal();
+    }
+    if (alloc != nullptr) {
+        if (access(alloc, F_OK) == -1) {
+            fatal();
+        }
+        str.append(":");
+        str.append(alloc);
+    }
+    str.insert(0, "LD_PRELOAD=");
 
     if (fork() == 0) {
         i = 0;
-        for (i = 0; env[i] != nullptr; i++); // Find number of environment variables so we know how much to malloc
+        for (i = 0; environ[i] != nullptr; i++); // Find number of environment variables so we know how much to malloc
         new_env = (char **) malloc((i + 2) * sizeof(char *)); // +1 for LD_PRELOAD and +1 for nullptr
-        new_env[0] = alloc; // Copy LD_PRELOAD value to environment variables of new process
+        new_env[0] = (char *) str.c_str();
         for (i = 0; environ[i] != nullptr; i++) {
-            new_env[i + 1] = env[i];
+            new_env[i + 1] = strdup(environ[i]);
         }
         new_env[i + 1] = nullptr;
+        std::cout << std::endl << "OUTPUT OF " << str << " ";
+        for (i = 0; argv[i] != nullptr; i++) {
+            std::cout << argv[i] << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "------------------------------------------------------------" << std::endl;
         execve(argv[0], argv, new_env);
         fatal(); // execve should never reach this point if it succeeded
     }
     wait(nullptr);
+    std::cout << "------------------------------------------------------------" << std::endl;
+    std::cout << "END OF OUTPUT" << std::endl << std::endl;
 }
 
 /*
@@ -100,7 +129,7 @@ std::vector<ParsedThreadData> *get_child_data() {
     struct stat sbuf;
     void *ptr;
     for (int i = 0; true; i++) {
-        snprintf(fname, 100, "%d.threads.bin", i);
+        snprintf(fname, 100, THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
         fd = open(fname, O_RDWR);
         if (fd == -1) {
             break;

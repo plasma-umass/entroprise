@@ -14,7 +14,7 @@ void fatal(char *msg) {
 }
 
 void fatal() {
-    perror("ERROR:");
+    perror("ERROR");
     exit(EXIT_FAILURE);
 }
 
