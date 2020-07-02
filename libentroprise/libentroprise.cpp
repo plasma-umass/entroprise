@@ -47,7 +47,7 @@ class ThreadData {
         ThreadData(int tid) { 
             char fname[256];
             const unsigned int INIT_ADDRS = 8192, INIT_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * INIT_ADDRS;
-            snprintf(fname, 256, THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, tid);
+            snprintf(fname, 256, THREAD_DIR "/" THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, tid);
             create_thread_data(&fd, &map, fname, INIT_SIZE);
             num_allocs = (int *) map;
             *num_allocs = 0;

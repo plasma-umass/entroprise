@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     ParsedThreadData *cur;
 
     for (int i = 0; true; i++) {
-        snprintf(fname, 100, THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
+        snprintf(fname, 100, THREAD_DIR "/" THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
         if (access(fname, F_OK) == -1) {
             break;
         }

@@ -17,9 +17,11 @@
 #include "runs.hh"
 #include "ks.hh"
 // #define FILE_NAME ".addrs.bin"
-#define FILE_NAME "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/.entroprise-data.bin"
-#define THREAD_FILE_PREFIX "."
+// #define FILE_NAME "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/.entroprise-data.bin"
+#define THREAD_DIR "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/tmp"
+#define THREAD_FILE_PREFIX ""
 #define THREAD_FILE_POSTFIX ".threads.bin"
+#define LIBENTROPRISE_DIR "/home/msteranka/entroprise/libentroprise"
 
 static const int NUM_RUNS_TESTS = 100;
 static const double D_ALPHA = 0.565;
@@ -70,15 +72,15 @@ class ParsedThreadData {
 
 void create_proc(char **argv, char *alloc) {
     extern char **environ;
-    char **new_env, cwd[256];
+    // char **new_env, cwd[256];
+    char **new_env;
     int i;
     std::string str;
 
-    if (getcwd(cwd, 256) == nullptr) {
-        fatal();
-    }
-    str.assign(cwd);
-    str.append("/libentroprise.so");
+    // if (getcwd(cwd, 256) == nullptr) {
+    //     fatal();
+    // }
+    str.assign(LIBENTROPRISE_DIR "/libentroprise.so");
     if (access(str.c_str(), F_OK) == -1) {
         fatal();
     }
@@ -129,7 +131,7 @@ std::vector<ParsedThreadData> *get_child_data() {
     struct stat sbuf;
     void *ptr;
     for (int i = 0; true; i++) {
-        snprintf(fname, 100, THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
+        snprintf(fname, 100, THREAD_DIR "/" THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, i);
         fd = open(fname, O_RDWR);
         if (fd == -1) {
             break;
