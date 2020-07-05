@@ -158,8 +158,10 @@ void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
         fatal(err3);
     }
     ptr = mmap(nullptr, NEW_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    // tprintf::tprintf("NEW_SIZE = @\n", NEW_SIZE);
     if (ptr == MAP_FAILED) {
         fatal(err4);
+        // fatal();
     }
     if (madvise(ptr, NEW_SIZE, MADV_SEQUENTIAL) == -1) {
         fatal(err5);

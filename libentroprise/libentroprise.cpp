@@ -7,6 +7,8 @@
 #include "hyperloglog.hpp"
 #include "proc.hh"
 #include "fatal.hh"
+#include <unistd.h>
+#include <sys/syscall.h>
 
 #ifdef ENTROPRISE_BACKTRACE
 #include <execinfo.h>
@@ -122,7 +124,8 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
 
     gdata = get_global_data(); // Fetch global data
     ptr = real_malloc(size);
-    tid = pthread_self();
+    // tid = pthread_self();
+    tid = syscall(SYS_gettid);
     gdata->mtx.lock();
     if (gdata->m.find(tid) == gdata->m.end()) { // If the unordered_map does not contain this thread ID...
         int n = gdata->num_threads++; // Then increase the number of threads
