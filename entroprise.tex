@@ -1,0 +1,120 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{blindtext}
+\usepackage[legalpaper, margin=1in]{geometry}
+
+\setlength{\columnsep}{1cm}
+
+\author{
+    Michael Steranka\\
+    Department of Computer Science\\
+    University of Massachusetts Amherst\\
+    Amherst, MA, USA\\
+    \texttt{msteranka@umass.edu}
+    \and
+    Emery D. Berger\\
+    Department of Computer Science\\
+    University of Massachusetts Amherst\\
+    Amherst, MA, USA\\
+    \texttt{emery@cs.umass.edu}
+}
+\title{Entroprise: Quantifying Object Reuse Security in Modern Allocators}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{multicols*}{2}
+
+\section*{Abstract}
+
+\noindent Memory-related exploitations are a growing concern among security professionals.
+As the prevalence of such exploitations increases, researchers have attempted to implement
+secure memory allocators to mitigate their effects.
+However, few means exist for quantitatively measuring allocator security.
+In this paper, we present Entroprise: a utility for measuring an allocator's ability to minimize the effectiveness of use-after-free attacks.
+Entroprise utilizes two proxies for measuring use-after-free security: entropy and randomness, and for several secure and insecure allocators, we provide their entropy and randomness in the worst-case scenario as well as when run alongside practical applications.
+Additionally, we also provide security analyses for each allocator that cover security concerns beyond object reuse.
+
+\section{Introduction}
+
+\blindtext
+
+Specifically, object reuse should be non-deterministic.
+
+\subsection{Entropy}
+
+\noindent Vaguely speaking, entropy is the amount of uncertainty associated with a random variable.
+We measure entropy with the following formula:
+
+\[ H(X) = -\sum_{i=1}^{n} P(x_i)\log_2P(x_i) \]
+
+\noindent where \( X \) is a discrete random variable, and each \( x_i \) is an object.
+However, the entropy depends on the number of allocations, which can vary across applications.
+Therefore, we concern ourselves more with an allocator's normalized entropy:
+
+\[ N(X) = \frac{H(X)}{\log_2n} \]
+
+\noindent where \( n \) is the number allocations.
+
+However, entropy itself remains insufficient for quantifying object reuse security.
+For example, an allocator could delay object reuse by reusing objects in a FIFO order.
+Clearly, object reuse would be completely deterministic, but the allocator would exhibit high entropy because an object will only be used again once all other objects in the free list have been exhausted.
+Therefore, we require another proxy for measuring reuse security.
+
+\subsection{Randomness}
+
+\noindent In addition to measuring entropy, we also measure randomness.
+
+\section{Entroprise}
+
+\noindent Entroprise measures entropy and randomness on a per-thread basis. Originally, entropy and randomness were measured globally, \textbf{TODO HERE}
+
+Initially, when measuring entropy and randomness, we attempted to use the function \textit{atexit} to print results upon process termination.
+However, the function specified by \textit{atexit} would never be called.
+In turn, we decided to print out all data every power of two allocation, but this implementation has the obvious disadvantage that a significant number of data would be forgone.
+Therefore, in its current state, Entroprise forks a given file and overrides the standard allocator by specifying the process' LD\_PRELOAD variable to Entroprise's own \textit{malloc}, which calls the allocator's allocation routine.
+
+Entroprise utilizes a HyperLogLog data structure for approximating entropy. 
+Upon every call to \textit{malloc}, the address obtained from the allocator is added to the HyperLogLog.
+When the forked process terminates, the entropy is calculated as \( \log_2c \), where \( c \) is the approximated cardinality in the HyperLogLog.
+Although this measure of entropy is not exact, it provides a good approximation.
+
+When measuring randomness, Entroprise appends every address to \textit{mmapped} region.
+When the forked process terminates, the parent divides the addresses into 100 equally-sized sequences and performs a runs test on each sequence.
+Then, the 100 p-values are used for the KS test. By default, Entroprise assumes a confidence level of \textbf{TODO} when determining whether the final p-value indicates a random sequence of addresses..
+
+\section{Security Analyses}
+
+\noindent Now we delve into a security analysis of each allocator studied for this paper. In total, eleven allocators were studied, five of which were designed with an emphasis on security.
+
+Foremost, we have DieHarder.
+
+We bring our attention to the Scudo Hardened Allocator developed by LLVM. 
+Scudo supports randomized placement as well as randomized reuse.
+Additionally, Scudo also delays object reuse before it randomly inserts them back onto their corresponding free lists.
+To mitigate buffer overflows, Scudo inserts two byte dynamic canaries at the beginning of every object.
+Finally, Scudo also has the ability to zero objects upon allocation and deallocation. \textbf{TODO [INSERT REFERENCE]}
+
+\section{Empirical Results}
+
+\subsection{Entropy}
+
+"This is in quotation marks."
+
+``This is in proper quotation marks.''
+
+`This is in proper quotation marks.'
+
+\subsection{Randomness}
+
+\section{Conclusion}
+
+\end{multicols*}
+
+\end{document}
