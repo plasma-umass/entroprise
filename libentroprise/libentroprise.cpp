@@ -1,19 +1,31 @@
-#include <atomic>
 #include <mutex>
 #include <new>
+<<<<<<< HEAD
 #include <cstdlib>
 #include <cstdio>
 #include <unordered_map>
 #include <heaplayers>
 #include <dlfcn.h>
 #include <pthread.h>
+=======
+#include <unordered_map>
+#include <dlfcn.h>
+#include <pthread.h>
+#include <heaplayers>
+>>>>>>> experimental
 #include "hyperloglog.hpp"
-#include "tprintf.h"
 #include "proc.hh"
 #include "fatal.hh"
+#include <unistd.h>
+#include <sys/syscall.h>
+
 #ifdef ENTROPRISE_BACKTRACE
 #include <execinfo.h>
 #include <signal.h>
+#endif
+
+#ifdef ENTROPRISE_DEBUG
+#include "tprintf.h"
 #endif
 
 /* 
@@ -30,6 +42,7 @@
 
 #ifdef ENTROPRISE_BACKTRACE
 
+// If the ENTROPRISE_BACKTRACE macro is defined, then a stack backtrace will be printed out if SIGSEGV or SIGINIT signals are received
 void handler(int sig) {
     void *buf[20];
     int backtrace_size = backtrace(buf, 20);
@@ -39,6 +52,7 @@ void handler(int sig) {
 
 #endif
 
+<<<<<<< HEAD
 class ThreadData {
     public:
         ThreadData() { 
@@ -50,10 +64,25 @@ class ThreadData {
             num_allocs = (int *) map;
             *num_allocs = 0;
             addrs_cap = INIT_ADDRS;
+=======
+// Each thread is given its own ThreadData object to store its per-thread data
+class ThreadData {
+    public:
+        ThreadData(int tid) { 
+            char fname[256];
+            const unsigned int INIT_ADDRS = 8192, INIT_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * INIT_ADDRS;
+            snprintf(fname, 256, THREAD_DIR "/" THREAD_FILE_PREFIX "%d" THREAD_FILE_POSTFIX, tid);
+            create_thread_data(&fd, &map, fname, INIT_SIZE);
+            num_allocs = (int *) map;
+            *num_allocs = 0;
+>>>>>>> experimental
             h = new(num_allocs + 1) hll::HyperLogLog;
             addrs = (void **) (h + 1);
+            addrs_cap = INIT_ADDRS;
+            this->tid = tid;
         }
 
+<<<<<<< HEAD
         void *map;
         int *num_allocs, capacity, fd, addrs_cap;
         hll::HyperLogLog *h;
@@ -69,6 +98,34 @@ class GlobalData {
         std::unordered_map<pthread_t, ThreadData, std::hash<pthread_t>, equal_to<pthread_t>, MyAllocator<pair<pthread_t, ThreadData>>> m;
 };
 
+=======
+        int *num_allocs; // Data stored in the mapping to fd
+        hll::HyperLogLog *h;
+        void **addrs;
+
+        void *map; // Data stored in ThreadData objects
+        int fd, tid, addrs_cap;
+};
+
+// Custom HeapLayers allocator that unordered_map allocates from 
+// No need for LockedHeap because access to the unordered_map is controlled by a mutex
+template <typename T>
+class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
+
+// Every thread shares one GlobalData object
+class GlobalData {
+    public:
+        GlobalData() {
+            num_threads = 0;
+        }
+
+        // unordered_map that maps thread IDs (pthread_t) to ThreadData objects and uses the HeapLayers generated allocator
+        std::unordered_map<pthread_t, ThreadData, std::hash<pthread_t>, equal_to<pthread_t>, MyAllocator<pair<pthread_t, ThreadData>>> m;
+        int num_threads;
+        std::mutex mtx; // Anytime a thread access or modifies data in GlobalData, it must acquire GlobalData's mutex beforehand
+};
+
+>>>>>>> experimental
 static __attribute__((always_inline)) GlobalData *get_global_data() {
     static char buf[sizeof(GlobalData)];
     static GlobalData *data = new(buf) GlobalData;
@@ -82,18 +139,23 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     void *ptr;
     pthread_t tid;
     ThreadData *tdata;
+<<<<<<< HEAD
+=======
+    int old_size, new_size;
+>>>>>>> experimental
 
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
         if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
             return nullptr;
         }
         is_dlsym = true;
-        real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc");
+        real_malloc = (void *(*)(size_t)) dlsym(RTLD_NEXT, "malloc"); // CAREFUL - dlsym calls calloc
         is_dlsym = false;
-        if (real_malloc == nullptr) { // Make sure dlsym worked
+        if (real_malloc == nullptr) { // Verify that dlsym was successful
             fatal((char *) "cannot dlsym malloc\n");
         }
 
+        // If the ENTROPRISE_BACKTRACE macro is defined, then create handles for SIGSEGV and SIGINT
         #ifdef ENTROPRISE_BACKTRACE
         if (signal(SIGSEGV, handler) == SIG_ERR) {
             fatal((char *) "could not signal SIGSEGV\n");
@@ -104,23 +166,35 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         #endif
     }
 
+<<<<<<< HEAD
     gdata = get_global_data(); // Fetch rest of data
     ptr = real_malloc(size);
-    tid = pthread_self();
-    tdata = &(gdata->m[tid]); // Fetch this thread's data
+    // tid = pthread_self();
+    tid = syscall(SYS_gettid);
+    gdata->mtx.lock();
+    if (gdata->m.find(tid) == gdata->m.end()) { // If the unordered_map does not contain this thread ID...
+        int n = gdata->num_threads++; // Then increase the number of threads
+        gdata->m.emplace(tid, n); // And insert it
+    }
+    tdata = &(gdata->m.find(tid)->second); // Fetch this thread's data
+    gdata->mtx.unlock();
     tdata->h->add((char *) &ptr, sizeof(void *)); // Add address to HyperLogLog
-    if (*(tdata->num_allocs) == tdata->addrs_cap) {
-        int old_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap;
-        int new_sz = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap * 2;
-        tdata->map = extend_data(tdata->fd, tdata->map, old_sz, new_sz); // FIX EXTEND_DATA
+    if (*(tdata->num_allocs) == tdata->addrs_cap) { // If this thread cannot store any more addresses...
+        int old_size = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap;
+        int new_size = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * tdata->addrs_cap * 2; // Then increase the capacity by a factor of two
+        tdata->map = extend_data(tdata->fd, tdata->map, old_size, new_size); // Extend the data region
+        tdata->num_allocs = (int *) tdata->map; // And change the corresponding pointers
+        tdata->h = new(tdata->num_allocs + 1) hll::HyperLogLog((char *) nullptr);
+        tdata->addrs = (void **) (tdata->h + 1);
         tdata->addrs_cap *= 2;
     }
     tdata->addrs[*(tdata->num_allocs)] = ptr; // Add address to list of addresses
     *(tdata->num_allocs) = *(tdata->num_allocs) + 1; // Increment number of allocations
+    // If the ENTROPRISE_DEBUG macro is defined, then for every call to malloc, print out the thread ID, number of allocations, and address generated by malloc
     #ifdef ENTROPRISE_DEBUG
     static std::mutex write_mtx;
     write_mtx.lock();
-    tprintf::tprintf("@: malloc(@) = @\n", data->num_allocs->load(), size, ptr);
+    tprintf::tprintf("Thread @; @ Allocations; malloc(@) = @\n", tdata->tid, *(tdata->num_allocs), size, ptr);
     write_mtx.unlock();
     #endif
     return ptr;

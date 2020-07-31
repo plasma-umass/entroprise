@@ -5,6 +5,9 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <errno.h>
+
+extern int errno;
 
 void fatal(char *msg) {
     char *prefix = (char *) "ENTROPRISE ERROR: ";
@@ -14,7 +17,8 @@ void fatal(char *msg) {
 }
 
 void fatal() {
-    perror("ERROR:");
+    perror("ENTROPRISE ERROR");
+    // fprintf(stderr, "%d\n", errno);
     exit(EXIT_FAILURE);
 }
 
