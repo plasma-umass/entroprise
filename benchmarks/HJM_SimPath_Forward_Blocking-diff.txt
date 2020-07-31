@@ -1,0 +1,27 @@
+6a7
+> #include <pthread.h>
+15d15
+< 
+72a73,74
+> thread_local FTYPE **pdZ = nullptr, **randZ = nullptr;
+> 
+82c84
+< {	
+---
+> {
+87,88d88
+< 	FTYPE **pdZ; //vector to store random normals
+< 	FTYPE **randZ; //vector to store random normals
+95,96c95,98
+< 	pdZ   = dmatrix(0, iFactors-1, 0, iN*BLOCKSIZE -1); //assigning memory
+< 	randZ = dmatrix(0, iFactors-1, 0, iN*BLOCKSIZE -1); //assigning memory
+---
+>     if (pdZ == nullptr) {
+>         pdZ = dmatrix(0, iFactors-1, 0, iN*BLOCKSIZE -1); //assigning memory
+>         randZ = dmatrix(0, iFactors-1, 0, iN*BLOCKSIZE -1); //assigning memory
+>     }
+161,162d162
+< 	free_dmatrix(pdZ, 0, iFactors -1, 0, iN*BLOCKSIZE -1);
+< 	free_dmatrix(randZ, 0, iFactors -1, 0, iN*BLOCKSIZE -1);
+163a164
+> 

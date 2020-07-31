@@ -1,0 +1,16 @@
+366a367
+> 
+379,380c380
+< 	FTYPE *pdexpRes;
+< 	pdexpRes = dvector(0,(iN-1)*BLOCKSIZE-1);
+---
+>     FTYPE pdexpRes[(iN-1)*BLOCKSIZE-1];
+382,383c382,384
+< 	for (j=0; j<=(iN-1)*BLOCKSIZE-1; ++j){ pdexpRes[j] = -pdRatePath[j]*ddelt; }
+< 	for (j=0; j<=(iN-1)*BLOCKSIZE-1; ++j){ pdexpRes[j] = exp(pdexpRes[j]);  }
+---
+> 	for (j=0; j<=(iN-1)*BLOCKSIZE-1; ++j) { 
+>         pdexpRes[j] = exp(-pdRatePath[j]*ddelt);
+>     }
+401d401
+< 	free_dvector(pdexpRes, 0,(iN-1)*BLOCKSIZE-1);
