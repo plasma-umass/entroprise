@@ -14,11 +14,6 @@
 #include <dirent.h>
 #include "tprintf.h"
 #include "fatal.hh"
-<<<<<<< HEAD
-// #define FILE_NAME ".addrs.bin"
-#define FILE_NAME "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/.entroprise-data.bin"
-#include <cstdio>
-=======
 #include "runs.hh"
 #include "ks.hh"
 // #define FILE_NAME ".addrs.bin"
@@ -64,7 +59,6 @@ class ParsedThreadData {
         int runs_data[NUM_RUNS_TESTS][3];
         bool is_random;
 };
->>>>>>> experimental
 
 /*
     * create_process
@@ -130,29 +124,6 @@ void create_proc(char **argv, char *alloc) {
     * Return Value: pointer to the data
 */
 
-<<<<<<< HEAD
-void **get_child_data() {
-    void **data;
-    DIR *dir = opendir("./");
-    if (dir == nullptr) {
-        return nullptr;
-    }
-    struct *dirent ent;
-    while ((ent = readdir(dir)) != nullptr) {
-        printf("%s\n", ent->d_name);
-    }
-    return nullptr;
-}
-
-void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
-    void *ptr;
-    char c = '\0', *err1 = (char *) "extend_data(): munmap failed\n", *err2 = (char *) "extend_data(): lseek failed\n", *err3 = (char *) "extend_data(): write failed\n", *err4 = (char *) "extend_data(): mmap failed\n", *err5 = (char *) "extend_data(): madvise failed\n";
-    if (map != nullptr && OLD_SIZE != -1) {
-        if (munmap(map, OLD_SIZE) == -1) {
-            fatal(err1);
-        }
-    }
-=======
 std::vector<ParsedThreadData> *get_child_data() {
     std::vector<ParsedThreadData> *data = new std::vector<ParsedThreadData>;
     char fname[100];
@@ -180,7 +151,6 @@ std::vector<ParsedThreadData> *get_child_data() {
 void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
     void *ptr;
     char c = '\0', *err1 = (char *) "extend_data(): munmap failed\n", *err2 = (char *) "extend_data(): lseek failed\n", *err3 = (char *) "extend_data(): write failed\n", *err4 = (char *) "extend_data(): mmap failed\n", *err5 = (char *) "extend_data(): madvise failed\n";
->>>>>>> experimental
     if (lseek(fd, NEW_SIZE, SEEK_SET) == -1) {
         fatal(err2);
     }
@@ -188,10 +158,7 @@ void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
         fatal(err3);
     }
     ptr = mmap(nullptr, NEW_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-<<<<<<< HEAD
-=======
     // tprintf::tprintf("NEW_SIZE = @\n", NEW_SIZE);
->>>>>>> experimental
     if (ptr == MAP_FAILED) {
         fatal(err4);
         // fatal();
@@ -204,9 +171,6 @@ void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
         if (munmap(map, OLD_SIZE) == -1) {
             fatal(err1);
         }
-    }
-    if (madvise(ptr, NEW_SIZE, MADV_SEQUENTIAL) == -1) {
-        fatal(err5);
     }
     return ptr;
 }

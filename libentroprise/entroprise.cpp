@@ -39,21 +39,6 @@ int main(int argc, char *argv[]) {
     //     return EXIT_FAILURE;
     // }
 
-<<<<<<< HEAD
-    const int MAX_ADDRS = std::stoi(argv[1]), DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
-    void *ptr;
-    int fd, num_allocs, seq_len;
-    hll::HyperLogLog *h;
-    double card, entropy, max, ratio;
-    long unsigned int *addrs;
-    const int NUM_RUNS_TESTS = 100;
-    const double D_ALPHA = 0.565;
-    double p[NUM_RUNS_TESTS], d;
-    int runs_data[NUM_RUNS_TESTS][3];
-
-    create_process(argv + 3, environ, argv[2]);
-    ptr = get_proc_data();
-=======
     // const int MAX_ADDRS = std::stoi(argv[1]), DEFAULT_FILE_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * MAX_ADDRS;
     // void *ptr;
     // int fd, num_allocs, seq_len;
@@ -85,7 +70,6 @@ int main(int argc, char *argv[]) {
         create_proc(argv + exec_i, (char *) alloc.c_str());
     }
     tdata = get_child_data();
->>>>>>> experimental
 
     // num_allocs = *((int *) ptr);
     // h = new((int *) ptr + 1) hll::HyperLogLog((char *) nullptr);

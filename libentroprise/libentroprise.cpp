@@ -1,18 +1,9 @@
 #include <mutex>
 #include <new>
-<<<<<<< HEAD
-#include <cstdlib>
-#include <cstdio>
-#include <unordered_map>
-#include <heaplayers>
-#include <dlfcn.h>
-#include <pthread.h>
-=======
 #include <unordered_map>
 #include <dlfcn.h>
 #include <pthread.h>
 #include <heaplayers>
->>>>>>> experimental
 #include "hyperloglog.hpp"
 #include "proc.hh"
 #include "fatal.hh"
@@ -52,19 +43,6 @@ void handler(int sig) {
 
 #endif
 
-<<<<<<< HEAD
-class ThreadData {
-    public:
-        ThreadData() { 
-            char fname[100];
-            const unsigned int INIT_ADDRS = 8192, INIT_SIZE = sizeof(int) + sizeof(hll::HyperLogLog) + sizeof(void *) * INIT_ADDRS;
-            pthread_t tid = pthread_self();
-            snprintf(fname, 100, "%lu.bin", tid);
-            create_thread_data(&fd, &map, fname, INIT_SIZE);
-            num_allocs = (int *) map;
-            *num_allocs = 0;
-            addrs_cap = INIT_ADDRS;
-=======
 // Each thread is given its own ThreadData object to store its per-thread data
 class ThreadData {
     public:
@@ -75,30 +53,12 @@ class ThreadData {
             create_thread_data(&fd, &map, fname, INIT_SIZE);
             num_allocs = (int *) map;
             *num_allocs = 0;
->>>>>>> experimental
             h = new(num_allocs + 1) hll::HyperLogLog;
             addrs = (void **) (h + 1);
             addrs_cap = INIT_ADDRS;
             this->tid = tid;
         }
 
-<<<<<<< HEAD
-        void *map;
-        int *num_allocs, capacity, fd, addrs_cap;
-        hll::HyperLogLog *h;
-        void **addrs;
-};
-
-// Custom HeapLayers allocator that unordered_map allocates from
-template <typename T>
-class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
-
-class GlobalData {
-    public:
-        std::unordered_map<pthread_t, ThreadData, std::hash<pthread_t>, equal_to<pthread_t>, MyAllocator<pair<pthread_t, ThreadData>>> m;
-};
-
-=======
         int *num_allocs; // Data stored in the mapping to fd
         hll::HyperLogLog *h;
         void **addrs;
@@ -125,7 +85,6 @@ class GlobalData {
         std::mutex mtx; // Anytime a thread access or modifies data in GlobalData, it must acquire GlobalData's mutex beforehand
 };
 
->>>>>>> experimental
 static __attribute__((always_inline)) GlobalData *get_global_data() {
     static char buf[sizeof(GlobalData)];
     static GlobalData *data = new(buf) GlobalData;
@@ -139,10 +98,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
     void *ptr;
     pthread_t tid;
     ThreadData *tdata;
-<<<<<<< HEAD
-=======
     int old_size, new_size;
->>>>>>> experimental
 
     if (real_malloc == nullptr) { // If real_malloc is null, then we need to interpose malloc
         if (is_dlsym) { // If is_dlsym, then this is a recursive call to malloc through dlsym
@@ -166,8 +122,7 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
         #endif
     }
 
-<<<<<<< HEAD
-    gdata = get_global_data(); // Fetch rest of data
+    gdata = get_global_data(); // Fetch global data
     ptr = real_malloc(size);
     // tid = pthread_self();
     tid = syscall(SYS_gettid);
