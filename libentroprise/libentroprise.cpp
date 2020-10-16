@@ -27,8 +27,6 @@
     * Replace vector init with memset in HLL constructor
     * Comment out every method but add and estimate
     * Add a constructor that takes a char * and does nothing
-
-    * MAKE SURE .addrs.bin IS LARGE ENOUGH
 */
 
 #ifdef ENTROPRISE_BACKTRACE

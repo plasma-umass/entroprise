@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# declare -a ALLOCATORS=('dieharder' 'freeguard' 'guarder' 'hoard' 'jemalloc' 'malloc' 'mesh' 'mimalloc' 'scudo' 'smimalloc' 'tcmalloc')
-# declare -a BENCHMARKS=('bodytrack' 'swaptions' 'vips')
-declare -a ALLOCATORS=('guarder')
-declare -a BENCHMARKS=('vips')
+declare -a ALLOCATORS=('dieharder' 'freeguard' 'guarder' 'hoard' 'jemalloc' 'malloc' 'mesh' 'mimalloc' 'scudo' 'smimalloc' 'tcmalloc')
+declare -a BENCHMARKS=('bodytrack' 'swaptions' 'vips')
 c_pids=()
 DATA_PATH="/home/msteranka/entroprise-parsec-local"
 OUT_PATH="./test-local"
@@ -12,7 +10,6 @@ for a in "${ALLOCATORS[@]}"
 do
     for b in "${BENCHMARKS[@]}"
     do
-        # eval "python3 plot.py $a $b &"
         if [ $b = 'swaptions' ] || [ $b = 'vips' ]; then
             i=1
         else
