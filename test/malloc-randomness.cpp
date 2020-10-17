@@ -12,11 +12,10 @@ void getAddrs(long unsigned int[], const int, const int);
 void printDist(double p[], const int NTESTS);
 
 int main() {
- 	// const int NALLOCS = 10000, NTESTS = 100, SZ = 16;
- 	// long unsigned int *addrs = new long unsigned int [NALLOCS * 100];
- 	const int NALLOCS = 10000, NTESTS = 1, SZ = 16;
+ 	const int NALLOCS = 10000, NTESTS = 100, SZ = 16;
  	long unsigned int *addrs = new long unsigned int [NALLOCS];
  	double p[NTESTS], d, dAlpha = 0.565;
+    int runs_data[3];
  
  	for (int i = 0; i < NALLOCS; ++i) {
  		addrs[i] = (long unsigned int) malloc(SZ);
@@ -27,10 +26,8 @@ int main() {
 
 	cout << "RUNS TEST (" << NTESTS << " TRIALS)" << endl;
  	for (int i = 0; i < NTESTS; ++i) {
-		// getAddrs(addrs, NALLOCS * 100, SZ);
- 		// p[i] = runs(addrs, NALLOCS * 100);
 		getAddrs(addrs, NALLOCS, SZ);
- 		p[i] = runs(addrs, NALLOCS);
+ 		p[i] = runs(addrs, NALLOCS, runs_data);
 		cout << p[i] << endl;
  	}
 	return 0;

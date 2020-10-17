@@ -5,8 +5,6 @@ outs=("dieharder" "freeguard" "guarder" "scudo" "jemalloc" "tcmalloc" "mimalloc-
 libspath="/root/496/lib" # Directory for shared libraries
 libs=("libdiehard.so" "libfreeguard.so" "libguarder.so" "libclang_rt.scudo-x86_64.so" "libjemalloc.so" "libtcmalloc.so.4" "libmimalloc-secure.so") # Names of shared libraries (order of libraries must match names of each in outs)
 
-make # Compile runs+ks
-
 i=0
 while [ $i -lt ${#outs[@]} ]
 do

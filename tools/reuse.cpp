@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     }
     close(fd);
 
-    create_process(argv + 2, environ, argv[1]);
+    create_proc(argv + 2, environ, argv[1]);
     ptr = get_proc_data();
     num_allocs = *((int *) ptr);
     max_num_live = *((int *) ptr + 1);
