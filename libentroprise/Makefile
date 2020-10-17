@@ -1,21 +1,27 @@
-CXXFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -DNENTROPRISE_DEBUG -fvisibility=hidden -DNENTROPRISE_BACKTRACE
 CXX = clang++
 LIBNAME = entroprise
-HLDIR = /home/msteranka/Heap-Layers
-HLLDIR = ./cpp-HyperLogLog/include
-INCLUDES = -I$(HLDIR) -I$(HLDIR)/utility -Icpp-HyperLogLog/include -I../include -I$(HLLDIR)
+HLDIR = Heap-Layers/
+HLLDIR = cpp-HyperLogLog/include/
+INCLUDES = -I$(HLDIR) -I$(HLDIR)utility -I../include -I$(HLLDIR)
 
-LINUX_SRC = lib$(LIBNAME).cpp $(HLDIR)/wrappers/gnuwrapper.cpp
-LINUX_COMPILE = $(CXX) $(CPPFLAGS) -D'CUSTOM_PREFIX(x)=xx\#\#x' -fno-builtin-malloc -pipe -fPIC $(INCLUDES) -D_REENTRANT=1 -shared $(LINUX_SRC) -Bsymbolic -o lib$(LIBNAME).so -ldl -lpthread -Wl,--no-as-needed
+ENTROPRISE_DEBUG = -DENTROPRISE_DEBUG -DENTROPRISE_BACKTRACE
+CXXFLAGS = -std=c++17 -flto -g -ffast-math -O2 -fno-builtin-malloc -fvisibility=hidden
+ENTROPRISE_FLAGS = $(CXXFLAGS) -o $(LIBNAME)
+LIBENTROPRISE_FLAGS = $(CXXFLAGS) -D'CUSTOM_PREFIX(x)=xx\#\#x' -fno-builtin-malloc -pipe -fPIC -D_REENTRANT=1 -shared -Bsymbolic -o lib$(LIBNAME).so -ldl -lpthread -Wl,--no-as-needed
 
-all: $(LINUX_SRC) entroprise.cpp
-	$(LINUX_COMPILE)
+ENTROPRISE_SRC = $(LIBNAME).cpp
+LIBENTROPRISE_SRC = lib$(LIBNAME).cpp $(HLDIR)wrappers/gnuwrapper.cpp
+
+all: Heap-Layers entroprise libentroprise
 
 entroprise:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o entroprise entroprise.cpp
+	$(CXX) $(ENTROPRISE_FLAGS) $(INCLUDES) $(ENTROPRISE_SRC)
 
-test:
-	$(CXX) -o test -pthread -std=c++17 test.cpp
+libentroprise:
+	$(CXX) $(LIBENTROPRISE_FLAGS) $(INCLUDES) $(LIBENTROPRISE_SRC)
 
 Heap-Layers:
 	git clone https://github.com/emeryberger/Heap-Layers
+
+clean:
+	rm -f $(LIBNAME) lib$(LIBNAME).so

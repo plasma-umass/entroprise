@@ -18,7 +18,6 @@ void fatal(char *msg) {
 
 void fatal() {
     perror("ENTROPRISE ERROR");
-    // fprintf(stderr, "%d\n", errno);
     exit(EXIT_FAILURE);
 }
 

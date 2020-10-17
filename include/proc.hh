@@ -16,10 +16,8 @@
 #include "fatal.hh"
 #include "runs.hh"
 #include "ks.hh"
-// #define FILE_NAME ".addrs.bin"
-// #define FILE_NAME "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/.entroprise-data.bin"
-#define THREAD_DIR "/nfs/cm/scratch1/emery/msteranka/entroprise-parsec-native/tmp"
-#define THREAD_FILE_PREFIX ""
+#define THREAD_DIR "."
+#define THREAD_FILE_PREFIX "."
 #define THREAD_FILE_POSTFIX ".threads.bin"
 #define LIBENTROPRISE_DIR "/home/msteranka/entroprise/libentroprise"
 
@@ -158,10 +156,8 @@ void *extend_data(int fd, void *map, const int OLD_SIZE, const int NEW_SIZE) {
         fatal(err3);
     }
     ptr = mmap(nullptr, NEW_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-    // tprintf::tprintf("NEW_SIZE = @\n", NEW_SIZE);
     if (ptr == MAP_FAILED) {
         fatal(err4);
-        // fatal();
     }
     if (madvise(ptr, NEW_SIZE, MADV_SEQUENTIAL) == -1) {
         fatal(err5);

@@ -19,16 +19,6 @@
 #include "tprintf.h"
 #endif
 
-/* 
-    * HYPERLOGLOG MODIFICATIONS:
-    (https://github.com/hideo55/cpp-HyperLogLog)
-    
-    * Change vector to buffer in cpp-HyperLogLog/include/hyperloglog.hpp
-    * Replace vector init with memset in HLL constructor
-    * Comment out every method but add and estimate
-    * Add a constructor that takes a char * and does nothing
-*/
-
 #ifdef ENTROPRISE_BACKTRACE
 
 // If the ENTROPRISE_BACKTRACE macro is defined, then a stack backtrace will be printed out if SIGSEGV or SIGINIT signals are received
@@ -122,7 +112,6 @@ extern "C" __attribute__((always_inline)) void *xxmalloc(size_t size) {
 
     gdata = get_global_data(); // Fetch global data
     ptr = real_malloc(size);
-    // tid = pthread_self();
     tid = syscall(SYS_gettid);
     gdata->mtx.lock();
     if (gdata->m.find(tid) == gdata->m.end()) { // If the unordered_map does not contain this thread ID...
