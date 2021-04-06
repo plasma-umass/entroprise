@@ -1,110 +1,106 @@
 #include <iostream>
 #include <unordered_map>
-#include <cmath>
-#include <cstdlib>
 #include <future>
 #include <iomanip>
-#include <list>
-#include <map>
-#include <mutex>
-#include <heaplayers>
+#include <cstdlib>
+#include <cassert>
+#include "heaplayers"
 #include "hyperloglog.hpp"
 #include "murmur3.h"
 
-using namespace HL;
-using namespace std;
-
 template <typename T>
-class MyAllocator : public STLAllocator<T, FreelistHeap<BumpAlloc<4096, MmapHeap>>> {};
+class MyAllocator : public HL::STLAllocator<T, HL::FreelistHeap<HL::BumpAlloc<4096, HL::MmapHeap>>> { };
 
-void fatal() {
-    perror("ERROR:");
-    exit(-1);
-}
+void prime_heap(const int OBJECT_SIZE, const int NUM_ALLOCS) {
+    // Dynamically allocated because stack allocation can segfault
+    //
+	char **objs = new char *[NUM_ALLOCS];
 
-void primeHeap(const int OBJECT_SIZE, const int MIN_ALLOC) {
-	char **objs = new char *[MIN_ALLOC];
-
-	for (int i = 0; i < MIN_ALLOC; i++) {
+	for (int i = 0; i < NUM_ALLOCS; i++) {
 		objs[i] = (char *) malloc(OBJECT_SIZE);
-        if (objs[i] == NULL) {
-            fatal();
-        }
+        assert(objs[i]);
 	}
-  	for (int i = 0; i < MIN_ALLOC; i++) {
+  	for (int i = 0; i < NUM_ALLOCS; i++) {
 		free(objs[i]);
 	}
 
-	delete [] objs;
+	delete[] objs;
 }
 
-float getExactEntropy(const int OBJECT_SIZE, const int MIN_ALLOC) {
-	unordered_map<char *, int, hash<char *>, equal_to<char *>, MyAllocator<pair<char * const, int>>> counter;
-    primeHeap(OBJECT_SIZE, MIN_ALLOC);
+double get_exact_entropy(const int OBJECT_SIZE, const int NUM_ALLOCS) {
+	std::unordered_map<char *, int, std::hash<char *>, std::equal_to<char *>, 
+                       MyAllocator<std::pair<char * const, int>>> counter;
+    double entropy;
+    prime_heap(OBJECT_SIZE, NUM_ALLOCS);
 
-  	for (int i = 0; i < MIN_ALLOC; i++) {
-	    char *p = (char *) malloc(OBJECT_SIZE);
-        if (p == NULL) {
-            fatal();
-        }
-	    free(p);
-	    if (counter.find(p) == counter.end()) {
-	      counter[p] = 0;
+  	for (int i = 0; i < NUM_ALLOCS; i++) {
+	    char *ptr = (char *) malloc(OBJECT_SIZE);
+        assert(ptr);
+	    if (counter.find(ptr) == counter.end()) {
+	      counter[ptr] = 0;
 	    }
-	    counter[p]++;
+	    counter[ptr]++;
+	    free(ptr);
   	}
 
-  	float entropy = 0.0;
-  	for (auto it = counter.begin(); it != counter.end(); ++it) {
+  	entropy = 0;
+  	for (auto it = counter.begin(); it != counter.end(); it++) {
 		char *address = (*it).first;
   	  	int count = (*it).second;
-  	  	entropy += -log(count / (double) MIN_ALLOC) / log(2.0) * (count / (double) MIN_ALLOC);
+  	  	entropy += -log(count / (double) NUM_ALLOCS) / log(2.0) * (count / (double) NUM_ALLOCS);
   	}
 	return entropy;
 }
 
-float getBoundedEntropy(const int OBJECT_SIZE, const int MIN_ALLOC) {
-    hll::HyperLogLog hll(16); // Initialize HyperLogLog with 2^16 bit width
-    primeHeap(OBJECT_SIZE, MIN_ALLOC);
+double get_approx_entropy(const int OBJECT_SIZE, const int NUM_ALLOCS, const uint8_t BIT_WIDTH) {
+    // Larger BIT_WIDTH = more accuracy, but more space and longer runtime
+    //
+    hll::HyperLogLog hll(BIT_WIDTH);
+    prime_heap(OBJECT_SIZE, NUM_ALLOCS);
 
-    for (int i = 0; i < MIN_ALLOC; i++) {
-	    void *ptr = (void *) malloc(OBJECT_SIZE);
-        if (ptr == NULL) {
-            fatal();
-        }
+    for (int i = 0; i < NUM_ALLOCS; i++) {
+	    char *ptr = (char *) malloc(OBJECT_SIZE);
+        assert(ptr);
+        hll.add((const char *) &ptr, sizeof(ptr));
 	    free(ptr);
-        hll.add((char *) &ptr, sizeof(void *));
     }
 
-    return log(hll.estimate()) / log(2.0);
+    return std::log(hll.estimate()) / log(2.0);
 }
 
 int main(int argc, char *argv[]) {
 	if (argc != 5) {
-		cerr << "usage: <OBJECT_SIZE> <MIN_ALLOC> <NTHREADS> <BOUND=y/n>" << endl;
-		return -1;
+		std::cerr << "usage: <OBJECT_SIZE> <NUM_ALLOCS> <NUM_THREADS> <APPROXIMATE=y/n>" << std::endl;
+		return EXIT_FAILURE;
 	}
 
-	const int OBJECT_SIZE = stoi(argv[1]), MIN_ALLOC = stoi(argv[2]), NTHREADS = stoi(argv[3]);
-    bool approx = (argv[4][0] == 'y');
-	future<float> *threads = new future<float>[NTHREADS];
-	float entropy = 1, max = log(MIN_ALLOC / NTHREADS) / log(2.0);
+	const unsigned int OBJECT_SIZE = std::stoi(argv[1]), 
+                       NUM_ALLOCS = std::stoi(argv[2]), 
+                       NUM_THREADS = std::stoi(argv[3]);
+    const bool IS_APPROX = (argv[4][0] == 'y');
+    const uint8_t BIT_WIDTH = 16;
+    const double MAX_ENTROPY = std::log(NUM_ALLOCS) / std::log(2.0);
+    std::future<double> threads[NUM_THREADS];
+	double entropy;
 
-    if (approx) { // Bound entropy
-        for (int i = 0; i < NTHREADS; i++) {
-            threads[i] = async(getBoundedEntropy, OBJECT_SIZE, MIN_ALLOC / NTHREADS);
+    if (IS_APPROX) { // Get approximate entropy using HyperLogLog
+        for (int i = 0; i < NUM_THREADS; i++) {
+            threads[i] = std::async(get_approx_entropy, OBJECT_SIZE, NUM_ALLOCS, BIT_WIDTH);
         }
-    } else { // Get exact entropy
-        for (int i = 0; i < NTHREADS; i++) {
-            threads[i] = async(getExactEntropy, OBJECT_SIZE, MIN_ALLOC / NTHREADS);
+    } else { // Get exact entropy using std::unordered_map
+        for (int i = 0; i < NUM_THREADS; i++) {
+            threads[i] = std::async(get_exact_entropy, OBJECT_SIZE, NUM_ALLOCS);
         }
     }
 
-	for (int i = 0; i < NTHREADS; i++) { // Compute average
+    entropy = 1;
+    for (int i = 0; i < NUM_THREADS; i++) { // Compute geometric average
 		entropy *= threads[i].get();
     }
-	entropy = pow(entropy, 1.0 / NTHREADS);
+	entropy = pow(entropy, 1.0 / NUM_THREADS);
 
-	cout << fixed << setprecision(4) << entropy << "   " << max << "   " << entropy * 100.0 / max << "%" << endl;
-  	return 0;
+	std::cout << std::fixed << std::setprecision(4) << entropy << "   " << MAX_ENTROPY << "   " << 
+                 entropy / MAX_ENTROPY << std::endl;
+
+  	return EXIT_SUCCESS;
 }
