@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "hyperloglog.hpp"
+#include "nmhyperloglog.hpp"
 #include "proc.hh"
 #include "runs.hh"
 #include "ks.hh"

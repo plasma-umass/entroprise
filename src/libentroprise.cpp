@@ -4,7 +4,7 @@
 #include <dlfcn.h>
 #include <pthread.h>
 #include <heaplayers>
-#include "hyperloglog.hpp"
+#include "nmhyperloglog.hpp"
 #include "proc.hh"
 #include "fatal.hh"
 #include <unistd.h>

@@ -1,6 +1,12 @@
 #if !defined(HYPERLOGLOG_HPP)
 #define HYPERLOGLOG_HPP
 
+// Taken from https://github.com/hideo55/cpp-HyperLogLog
+    // Change vector to buffer
+    // Replace vector init with memset in HLL constructor
+    // Comment out every method but add and estimate
+    // Add a constructor that takes a char * and does nothing
+
 /**
  * @file hyperloglog.hpp
  * @brief HyperLogLog cardinality estimator
@@ -8,17 +14,11 @@
  * @author Hideaki Ohno
  */
 
-/*
- * Removed dynamic exceptions for entroprise-standalone
- */
-
 #include <vector>
 #include <cmath>
-#include <cstdlib>
 #include <sstream>
-#include <stdexcept>
 #include <algorithm>
-#include <iostream>
+#include <string.h>
 #include "murmur3.h"
 
 #define HLL_HASH_SEED 313
@@ -51,11 +51,6 @@ inline uint8_t _get_leading_zero_count(uint32_t x, uint8_t b) {
 
 namespace hll {
 
-void hll_fatal() {
-    std::cerr << "HyperLogLog failed" << std::endl;
-    exit(EXIT_FAILURE);
-}
-
 static const double pow_2_32 = 4294967296.0; ///< 2^32
 static const double neg_pow_2_32 = -4294967296.0; ///< -(2^32)
 
@@ -71,12 +66,14 @@ public:
      * @param[in] b bit width (register size will be 2 to the b power).
      *            This value must be in the range[4,30].Default value is 4.
      */
-    HyperLogLog(uint8_t b = 4) : b_(b), m_(1 << b), M_(m_, 0) {
+    // HyperLogLog(uint8_t b = 4) : b_(b), m_(1 << b), M_(m_, 0) {
+    HyperLogLog(char *) {
 
-        if (b < 4 || 30 < b) {
-            hll_fatal();
-        }
+    }
 
+    HyperLogLog(uint8_t b = 4) : b_(b), m_(1 << b) {
+
+        memset(M_, 0, 1 << b); // b = 16
         double alpha;
         switch (m_) {
             case 16:
@@ -145,25 +142,20 @@ public:
      *
      * @param[in] other HyperLogLog instance to be merged
      */
-    void merge(const HyperLogLog& other) {
-        if (m_ != other.m_) {
-            std::stringstream ss;
-            ss << "number of registers doesn't match: " << m_ << " != " << other.m_;
-            hll_fatal();
-        }
-        for (uint32_t r = 0; r < m_; ++r) {
-            if (M_[r] < other.M_[r]) {
-                M_[r] |= other.M_[r];
-            }
-        }
-    }
+    // void merge(const HyperLogLog& other) {
+    //     for (uint32_t r = 0; r < m_; ++r) {
+    //         if (M_[r] < other.M_[r]) {
+    //             M_[r] |= other.M_[r];
+    //         }
+    //     }
+    // }
 
     /**
      * Clears all internal registers.
      */
-    void clear() {
-        std::fill(M_.begin(), M_.end(), 0);
-    }
+    // void clear() {
+    //     std::fill(M_.begin(), M_.end(), 0);
+    // }
 
     /**
      * Returns size of register.
@@ -179,47 +171,42 @@ public:
      *
      * @param[in,out] rhs Another HyperLogLog instance
      */
-    void swap(HyperLogLog& rhs) {
-        std::swap(b_, rhs.b_);
-        std::swap(m_, rhs.m_);
-        std::swap(alphaMM_, rhs.alphaMM_);
-        M_.swap(rhs.M_);       
-    }
+    // void swap(HyperLogLog& rhs) {
+    //     std::swap(b_, rhs.b_);
+    //     std::swap(m_, rhs.m_);
+    //     std::swap(alphaMM_, rhs.alphaMM_);
+    //     M_.swap(rhs.M_);       
+    // }
 
     /**
      * Dump the current status to a stream
      *
      * @param[out] os The output stream where the data is saved
      */
-    void dump(std::ostream& os) const {
-        os.write((char*)&b_, sizeof(b_));
-        os.write((char*)&M_[0], sizeof(M_[0]) * M_.size());
-        if(os.fail()){
-            hll_fatal();
-        }
-    }
+    // void dump(std::ostream& os) {
+    //     os.write((char*)&b_, sizeof(b_));
+    //     os.write((char*)&M_[0], sizeof(M_[0]) * M_.size());
+    // }
 
     /**
      * Restore the status from a stream
      * 
      * @param[in] is The input stream where the status is saved
      */
-    void restore(std::istream& is) {
-        uint8_t b = 0;
-        is.read((char*)&b, sizeof(b));
-        HyperLogLog tempHLL(b);
-        is.read((char*)&(tempHLL.M_[0]), sizeof(M_[0]) * tempHLL.m_);
-        if(is.fail()){
-            hll_fatal();
-        }       
-        swap(tempHLL);
-    }
+    // void restore(std::istream& is) {
+    //     uint8_t b = 0;
+    //     is.read((char*)&b, sizeof(b));
+    //     HyperLogLog tempHLL(b);
+    //     is.read((char*)&(tempHLL.M_[0]), sizeof(M_[0]) * tempHLL.m_);
+    //     swap(tempHLL);
+    // }
 
 protected:
     uint8_t b_; ///< register bit width
     uint32_t m_; ///< register size
     double alphaMM_; ///< alpha * m^2
-    std::vector<uint8_t> M_; ///< registers
+    uint8_t M_[65536]; // b = 16
+    // std::vector<uint8_t> M_; ///< registers
 };
 
 /**
@@ -275,34 +262,29 @@ public:
      *
      * @param[in] other HyperLogLog instance to be merged
      */
-    void merge(const HyperLogLogHIP& other) {
-        if (m_ != other.m_) {
-            std::stringstream ss;
-            ss << "number of registers doesn't match: " << m_ << " != " << other.m_;
-            hll_fatal();
-        }
-        for (uint32_t r = 0; r < m_; ++r) {
-            const uint8_t b = M_[r];
-            const uint8_t b_other = other.M_[r];
-            if (b < b_other) {
-                c_ += 1.0 / (p_/m_);
-                p_ -= 1.0/(1 << b);
-                M_[r] |= b_other;
-                if(b_other < register_limit_){
-                    p_ += 1.0/(1 << b_other);
-                }
-            }
-        }
-    }
+    // void merge(const HyperLogLogHIP& other) {
+    //     for (uint32_t r = 0; r < m_; ++r) {
+    //         const uint8_t b = M_[r];
+    //         const uint8_t b_other = other.M_[r];
+    //         if (b < b_other) {
+    //             c_ += 1.0 / (p_/m_);
+    //             p_ -= 1.0/(1 << b);
+    //             M_[r] |= b_other;
+    //             if(b_other < register_limit_){
+    //                 p_ += 1.0/(1 << b_other);
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
      * Clears all internal registers.
      */
-    void clear() {
-        std::fill(M_.begin(), M_.end(), 0);
-        c_ = 0.0;
-        p_ = 1 << b_;
-    }
+    // void clear() {
+    //     std::fill(M_.begin(), M_.end(), 0);
+    //     c_ = 0.0;
+    //     p_ = 1 << b_;
+    // }
 
     /**
      * Returns size of register.
@@ -318,45 +300,39 @@ public:
      *
      * @param[in,out] rhs Another HyperLogLog instance
      */
-    void swap(HyperLogLogHIP& rhs) {
-        std::swap(b_, rhs.b_);
-        std::swap(m_, rhs.m_);
-        std::swap(c_, rhs.c_);
-        M_.swap(rhs.M_);       
-    }
+    // void swap(HyperLogLogHIP& rhs) {
+    //     std::swap(b_, rhs.b_);
+    //     std::swap(m_, rhs.m_);
+    //     std::swap(c_, rhs.c_);
+    //     M_.swap(rhs.M_);       
+    // }
 
     /**
      * Dump the current status to a stream
      *
      * @param[out] os The output stream where the data is saved
      */
-    void dump(std::ostream& os) const {
-        os.write((char*)&b_, sizeof(b_));
-        os.write((char*)&M_[0], sizeof(M_[0]) * M_.size());
-        os.write((char*)&c_, sizeof(c_));
-        os.write((char*)&p_, sizeof(p_));
-        if(os.fail()){
-            hll_fatal();
-        }
-    }
+    // void dump(std::ostream& os) {
+    //     os.write((char*)&b_, sizeof(b_));
+    //     os.write((char*)&M_[0], sizeof(M_[0]) * M_.size());
+    //     os.write((char*)&c_, sizeof(c_));
+    //     os.write((char*)&p_, sizeof(p_));
+    // }
 
     /**
      * Restore the status from a stream
      * 
      * @param[in] is The input stream where the status is saved
      */
-    void restore(std::istream& is) {
-        uint8_t b = 0;
-        is.read((char*)&b, sizeof(b));
-        HyperLogLogHIP tempHLL(b);
-        is.read((char*)&(tempHLL.M_[0]), sizeof(M_[0]) * tempHLL.m_);
-        is.read((char*)&(tempHLL.c_), sizeof(double));
-        is.read((char*)&(tempHLL.p_), sizeof(double));
-        if(is.fail()){
-            hll_fatal();
-        }       
-        swap(tempHLL);
-    }
+    // void restore(std::istream& is) {
+    //     uint8_t b = 0;
+    //     is.read((char*)&b, sizeof(b));
+    //     HyperLogLogHIP tempHLL(b);
+    //     is.read((char*)&(tempHLL.M_[0]), sizeof(M_[0]) * tempHLL.m_);
+    //     is.read((char*)&(tempHLL.c_), sizeof(double));
+    //     is.read((char*)&(tempHLL.p_), sizeof(double));
+    //     swap(tempHLL);
+    // }
 private: 
     const uint8_t register_limit_;
     double c_;

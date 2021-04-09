@@ -1,8 +1,6 @@
 #ifndef MURMUR3_H
 #define MURMUR3_H
 
-// Taken from https://github.com/hideo55/cpp-HyperLogLog
-
 //-----------------------------------------------------------------------------
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
 // domain. The author hereby disclaims copyright to this source code.

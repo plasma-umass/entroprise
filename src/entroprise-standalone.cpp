@@ -4,9 +4,9 @@
 #include <iomanip>
 #include <cstdlib>
 #include <cassert>
-#include "heaplayers"
 #include "hyperloglog.hpp"
 #include "murmur3.h"
+#include "heaplayers.h"
 
 template <typename T>
 class MyAllocator : public HL::STLAllocator<T, HL::FreelistHeap<HL::BumpAlloc<4096, HL::MmapHeap>>> { };
@@ -69,23 +69,31 @@ double get_approx_entropy(const int OBJECT_SIZE, const int NUM_ALLOCS, const uin
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 5) {
-        std::cerr << "usage: <OBJECT_SIZE> <NUM_ALLOCS> <NUM_THREADS> <APPROXIMATE=y/n>" << std::endl;
+    if (argc != 5 && argc != 6) {
+        std::cerr << "usage: <OBJECT_SIZE> <NUM_ALLOCS> <NUM_THREADS> <APPROXIMATE=y/n> <BIT_WIDTH>" << std::endl;
         return EXIT_FAILURE;
     }
     
     const unsigned int OBJECT_SIZE = std::stoi(argv[1]), 
                        NUM_ALLOCS = std::stoi(argv[2]), 
-                       NUM_THREADS = std::stoi(argv[3]);
+                       NUM_THREADS = std::stoi(argv[3]),
+                       DEFAULT_BIT_WIDTH = 4;
     const bool IS_APPROX = (argv[4][0] == 'y');
-    const uint8_t BIT_WIDTH = 16;
+    uint8_t bit_width;
+    if (IS_APPROX) {
+        if (argc == 6) {
+            bit_width = std::stoi(argv[5]);
+        } else {
+            bit_width = DEFAULT_BIT_WIDTH;
+        }
+    }
     const double MAX_ENTROPY = std::log(NUM_ALLOCS) / std::log(2.0);
     std::future<double> threads[NUM_THREADS];
     double entropy;
     
     if (IS_APPROX) { // Get approximate entropy using HyperLogLog
         for (int i = 0; i < NUM_THREADS; i++) {
-            threads[i] = std::async(get_approx_entropy, OBJECT_SIZE, NUM_ALLOCS, BIT_WIDTH);
+            threads[i] = std::async(get_approx_entropy, OBJECT_SIZE, NUM_ALLOCS, bit_width);
         }
     } else { // Get exact entropy using std::unordered_map
         for (int i = 0; i < NUM_THREADS; i++) {
