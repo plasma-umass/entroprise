@@ -1,0 +1,9 @@
+Allocator: /nfs/cm/scratch1/emery/msteranka/shared/libsmimalloc.so
+Object Size: 16
+Number of Threads: 8
+Approximated: no
+
+1000 ALLOCATIONS: 9.4578   9.9658   0.9490
+10000 ALLOCATIONS: 11.8287   13.2877   0.8902
+100000 ALLOCATIONS: 11.8901   16.6096   0.7159
+1000000 ALLOCATIONS: 11.9068   19.9316   0.5974

@@ -1,45 +1,49 @@
-#!/bin/bash
-# Runs all allocators for every given object size, number of objects, and number of threads
+# !/bin/bash
+# Calculates entropy on a given set of allocators for a given set of object sizes, number of objects, and number of threads
 
-outspath="approx" # Directory for output of each allocator
-outs=("dieharder" "freeguard" "guarder" "scudo" "jemalloc" "tcmalloc" "smimalloc") # Names for output files
-libspath="/root/496/lib" # Directory for shared libraries
-libs=("libdiehard.so" "libfreeguard.so" "libguarder.so" "libclang_rt.scudo-x86_64.so" "libjemalloc.so" "libtcmalloc.so.4" "libmimalloc-secure.so") # Names of shared libraries (order of libraries must match names of each in outs)
-# sizes=(16 32 64 128 256 512 1024 2048 4096 8192 16384 32768 65536) # Size classes
+# Names of allocators
+#
+# NOTE: The shared libraries corresponding to all allocators must be named in the following format:
+# lib<ALLOCATOR_NAME>.so
+# Otherwise, LD_PRELOAD will fail to find the correct shared library
+# libs=("freeguard" "guarder" "scudo" "jemalloc" "mimalloc" "mesh" "hoard" "tcmalloc" "smimalloc" "dieharder")
+libs=("dieharder")
+libspath="/nfs/cm/scratch1/emery/msteranka/shared" # Directory containing shared libraries for allocators
+outpath="../data/tmp" # Directory for output files
+entroprisepath="../src" # Path to entroprise-standalone
+outpostfix="-entropy.out"
+bitwidth="16"
 sizes=(16 32 64) # Size classes
-nobjs=(100 1000 10000 100000 1000000 10000000) # Number of objects
+# sizes=(16 32 64 128 256) # Size classes
+nobjs=(10000 100000 1000000) # Number of objects
+# nobjs=(10000 100000 1000000 10000000) # Number of objects
+# nobjs=(10000) # Number of objects
 nthreads=(1 2 4 8) # Number of threads
 
-run() { # Runs $1 allocator and puts output in $2 file
-	export "LD_PRELOAD=$1"
+for i in "${libs[@]}"
+do
+	echo -n "" > "$outpath/$i$outpostfix" # Empty output files
+done
+
+for l in "${libs[@]}"
+do
+    echo "ALLOCATOR: $libspath/lib$l.so" >> $outpath/$l$outpostfix
+    echo -e "BIT_WIDTH: $bitwidth\n" >> $outpath/$l$outpostfix
 	for i in "${nthreads[@]}"
 	do
-		echo "NUM_THREADS: $i" >> $2
 		for j in "${nobjs[@]}"
 		do
-			echo -e "\tNUM_OBJECTS: $j" >> $2
 			for k in "${sizes[@]}" 
 			do
-				printf "\t\t%-5d   " $k >> $2
-				# LD_PRELOAD=$1 ./entroprise $k $j $i >> $2
-				./entroprise $k $j $i y >> $2
+                # TODO: When changing sizes/nobjs/nthreads, remember to also change the formatting
+                printf "THREADS: %-2d     NUM_ALLOCS: %-8d     ALLOC_SIZE: %-4d     ENTROPY: " $i $j $k >> $outpath/$l$outpostfix
+                echo "LD_PRELOAD=$libspath/lib$l.so $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix"
+                # LD_PRELOAD=$libspath/lib$l.so /usr/bin/time -f ", ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix
+                LD_PRELOAD=$libspath/lib$l.so /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
+                # /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
+                # LD_PRELOAD="$libspath/libmarkusgc.so $libspath/libmarkusgccpp.so" /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
 			done
-			echo "" >> $2
 		done
 	done
-}
-
-make # Compile entroprise
-
-for i in "${outs[@]}"
-do
-	echo > "$outspath/$i" # Clear out files
 done
 
-n=0
-while [ $n -lt ${#outs[@]} ]
-do
-	echo "running ${outs[$n]}"
-	run "$libspath/${libs[$n]}" "$outspath/${outs[$n]}" # Run entroprise with all allocators
- 	n=$(( n+1 ))
-done

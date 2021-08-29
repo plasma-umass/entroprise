@@ -1,0 +1,9 @@
+Allocator: /nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so
+Object Size: 16
+Number of Threads: 8
+Approximated: no
+
+1000 ALLOCATIONS: 9.9018   9.9658   0.9936
+10000 ALLOCATIONS: 13.2811   13.2877   0.9995
+100000 ALLOCATIONS: 16.6046   16.6096   0.9997
+1000000 ALLOCATIONS: 

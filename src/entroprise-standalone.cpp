@@ -107,8 +107,12 @@ int main(int argc, char *argv[]) {
     }
     entropy = pow(entropy, 1.0 / NUM_THREADS);
     
+    /*
     std::cout << std::fixed << std::setprecision(4) << entropy << "   " << MAX_ENTROPY << "   " << 
                  entropy / MAX_ENTROPY << std::endl;
-                 
+    */
+    // std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY << std::endl;
+    std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY;
+    // std::cout << "NUM_THREADS=" << NUM_THREADS << ", NUM_ALLOCS=" << NUM_ALLOCS << ", ALLOC_SIZE=" << OBJECT_SIZE << ", ENTROPY=" << entropy / MAX_ENTROPY << std::endl;
     return EXIT_SUCCESS;
 }

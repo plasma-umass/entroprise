@@ -1,0 +1,11 @@
+Allocator: /nfs/cm/scratch1/emery/msteranka/shared/libguarder.so
+Object Size: 16
+Number of Threads: 8
+Approximated: yes
+Bit Width: 10
+
+1000 ALLOCATIONS: 0:00.03
+10000 ALLOCATIONS: 0:00.04
+100000 ALLOCATIONS: 0:00.11
+1000000 ALLOCATIONS: 0:00.77
+10000000 ALLOCATIONS: 0:06.98

@@ -1,0 +1,11 @@
+Allocator: /nfs/cm/scratch1/emery/msteranka/shared/libscudo.so
+Object Size: 16
+Number of Threads: 8
+Approximated: yes
+Bit Width: 10
+
+1000 ALLOCATIONS: 0:00.00
+10000 ALLOCATIONS: 0:00.05
+100000 ALLOCATIONS: 0:00.53
+1000000 ALLOCATIONS: 0:05.31
+10000000 ALLOCATIONS: 0:56.56

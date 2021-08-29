@@ -1,0 +1,20 @@
+Entropy:
+================================
+(1) FFMalloc
+(2) Guarder
+(3) DieHarder
+(4) MarkUs
+(5) ptmalloc
+
+Performance:
+================================
+(1) FFMalloc
+(2) ptmalloc
+(3) Guarder
+(4) MarkUs
+(5) DieHarder
+
+No other particularly interesting notes - entropy seems stable 
+as everything increases, and performance worsens as parameters 
+increase.
+

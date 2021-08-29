@@ -1,0 +1,10 @@
+Allocator: /nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so
+Object Size: 16
+Number of Threads: 8
+Approximated: yes
+Bit Width: 10
+
+1000 ALLOCATIONS: 9.9341   9.9658   0.9968
+10000 ALLOCATIONS: 13.2284   13.2877   0.9955
+100000 ALLOCATIONS: 16.4957   16.6096   0.9931
+1000000 ALLOCATIONS: 19.8705   19.9316   0.9969
