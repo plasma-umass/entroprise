@@ -77,7 +77,7 @@ x_label = 'Allocation Time'
 y_label = 'Address'
 # addrs = get_addrs(data_path)
 # 8893 is the minimum number of allocations occuring across all benchmarks of interest (streamcluster, bodytrack, vips, swaptions)
-addrs = shuffle_addrs(get_addrs(data_path), 33149)
+addrs = shuffle_addrs(get_addrs(data_path), 33100)
 
 fig, ax = plt.subplots(figsize=(15,10))
 plt.title(plt_title, fontsize=32)
