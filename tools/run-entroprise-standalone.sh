@@ -1,47 +1,66 @@
 # !/bin/bash
-# Calculates entropy on a given set of allocators for a given set of object sizes, number of objects, and number of threads
 
-# Names of allocators
+# run-entroprise-standalone.sh
 #
-# NOTE: The shared libraries corresponding to all allocators must be named in the following format:
-# lib<ALLOCATOR_NAME>.so
-# Otherwise, LD_PRELOAD will fail to find the correct shared library
-# libs=("freeguard" "guarder" "scudo" "jemalloc" "mimalloc" "mesh" "hoard" "tcmalloc" "smimalloc" "dieharder")
-libs=("dieharder")
-libspath="/nfs/cm/scratch1/emery/msteranka/shared" # Directory containing shared libraries for allocators
-outpath="../data/tmp" # Directory for output files
-entroprisepath="../src" # Path to entroprise-standalone
-outpostfix="-entropy.out"
-bitwidth="16"
-sizes=(16 32 64) # Size classes
-# sizes=(16 32 64 128 256) # Size classes
-nobjs=(10000 100000 1000000) # Number of objects
-# nobjs=(10000 100000 1000000 10000000) # Number of objects
-# nobjs=(10000) # Number of objects
-nthreads=(1 2 4 8) # Number of threads
+# Calculates the entropy and runtime on a given set of allocators, allocation sizes, 
+# numbers of allocations, and numbers of threads.
 
-for i in "${libs[@]}"
+# List of allocators:
+#
+# DieHarder
+# FreeGuard
+# Guarder
+# Scudo
+# smimalloc
+# ptmalloc
+# jemalloc
+# tcmalloc
+# mimalloc
+# Hoard
+# Mesh
+
+# NOTE: The libraries for all allocators must adhere to the following naming convention:
+#
+# lib<allocator>.so
+#
+# Otherwise, LD_PRELOAD will fail to find the correct file.
+
+# NOTE: When changing the number of threads, the number of allocations, or the allocation 
+# sizes, you should also verify that the formatting of printf(1) will be correct.
+
+allocators=("dieharder")                              # Allocators to run
+num_threads=(1 2 4 8)                                 # Number of threads
+num_allocs=(1000 10000 100000 1000000 10000000)       # Number of objects
+alloc_sizes=(16 32 64 128 256)                        # Size classes
+bit_width="16"                                        # Bit width (a larger bit width will yield higher accuracy)
+
+allocators_path="/home/msteranka/allocators"          # Directory containing .so files for allocators
+entroprise_path="../src"                              # Path to entroprise-standalone
+output_path="../data/tmp/tesla"                       # Directory for output files
+output_postfix=".out"
+time_path="/usr/bin"
+
+for i in "${allocators[@]}"
 do
-	echo -n "" > "$outpath/$i$outpostfix" # Empty output files
+	echo -n "" > "$output_path/$i$output_postfix"     # Empty existing output files
 done
 
-for l in "${libs[@]}"
+for l in "${allocators[@]}"
 do
-    echo "ALLOCATOR: $libspath/lib$l.so" >> $outpath/$l$outpostfix
-    echo -e "BIT_WIDTH: $bitwidth\n" >> $outpath/$l$outpostfix
-	for i in "${nthreads[@]}"
+    echo "ALLOCATOR: $allocators_path/lib$l.so" >> $output_path/$l$output_postfix
+    echo -e "BIT_WIDTH: $bit_width\n" >> $output_path/$l$output_postfix
+	for i in "${num_threads[@]}"
 	do
-		for j in "${nobjs[@]}"
+		for j in "${num_allocs[@]}"
 		do
-			for k in "${sizes[@]}" 
+			for k in "${alloc_sizes[@]}" 
 			do
-                # TODO: When changing sizes/nobjs/nthreads, remember to also change the formatting
-                printf "THREADS: %-2d     NUM_ALLOCS: %-8d     ALLOC_SIZE: %-4d     ENTROPY: " $i $j $k >> $outpath/$l$outpostfix
-                echo "LD_PRELOAD=$libspath/lib$l.so $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix"
-                # LD_PRELOAD=$libspath/lib$l.so /usr/bin/time -f ", ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix
-                LD_PRELOAD=$libspath/lib$l.so /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
-                # /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
-                # LD_PRELOAD="$libspath/libmarkusgc.so $libspath/libmarkusgccpp.so" /usr/bin/time -f "     ELAPSED_SECONDS=%es" $entroprisepath/entroprise-standalone $k $j $i y $bitwidth >> $outpath/$l$outpostfix 2>> $outpath/$l$outpostfix
+                printf "THREADS: %-2d     NUM_ALLOCS: %-8d     ALLOC_SIZE: %-4d     ENTROPY: " $i $j $k >> $output_path/$l$output_postfix
+                echo "LD_PRELOAD=$allocators_path/lib$l.so $time_path/time $entroprise_path/entroprise-standalone $k $j $i y $bit_width >> $output_path/$l$output_postfix"
+                # LD_PRELOAD=$allocators_path/lib$l.so $entroprise_path/entroprise-standalone $k $j $i y $bit_width >> $output_path/$l$output_postfix
+                LD_PRELOAD=$allocators_path/lib$l.so $time_path/time -f "     ELAPSED_SECONDS=%es" $entroprise_path/entroprise-standalone $k $j $i y $bit_width >> $output_path/$l$output_postfix 2>> $output_path/$l$output_postfix
+                # $time_path/time -f "     ELAPSED_SECONDS=%es" $entroprise_path/entroprise-standalone $k $j $i y $bit_width >> $output_path/$l$output_postfix 2>> $output_path/$l$output_postfix
+                # LD_PRELOAD="$allocators_path/libmarkusgc.so $allocators_path/libmarkusgccpp.so" $time_path/time -f "     ELAPSED_SECONDS=%es" $entroprise_path/entroprise-standalone $k $j $i y $bit_width >> $output_path/$l$output_postfix 2>> $output_path/$l$output_postfix
 			done
 		done
 	done
