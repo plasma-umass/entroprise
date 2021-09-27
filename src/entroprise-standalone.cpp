@@ -7,6 +7,11 @@
 #include "hyperloglog.hpp"
 #include "murmur3.h"
 #include "heaplayers.h"
+#include "runs.hh"
+#include "ks.hh"
+
+static const int NUM_RUNS = 100;
+static const double D_ALPHA = 0.565;
 
 template <typename T>
 class MyAllocator : public HL::STLAllocator<T, HL::FreelistHeap<HL::BumpAlloc<4096, HL::MmapHeap>>> { };
@@ -68,6 +73,23 @@ double get_approx_entropy(const int OBJECT_SIZE, const int NUM_ALLOCS, const uin
     return std::log(hll.estimate()) / log(2.0);
 }
 
+bool is_random(const int OBJECT_SIZE, const int NUM_ALLOCS) {
+    double p[NUM_RUNS];
+    for (int i = 0; i < NUM_RUNS; i++) {
+        void *addrs[NUM_ALLOCS];
+        int runs_data[3];
+        prime_heap(OBJECT_SIZE, NUM_ALLOCS);
+        for (int j = 0; j < NUM_ALLOCS; j++) {
+            addrs[j] = malloc(OBJECT_SIZE);
+            assert(addrs[j]);
+            free(addrs[j]);
+        }
+        p[i] = runs((long unsigned int *) addrs, NUM_ALLOCS, runs_data);
+    }
+    double d = ks(p, NUM_RUNS);
+    return (D_ALPHA > d);
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 5 && argc != 6) {
         std::cerr << "usage: <OBJECT_SIZE> <NUM_ALLOCS> <NUM_THREADS> <APPROXIMATE=y/n> <BIT_WIDTH>" << std::endl;
@@ -111,8 +133,9 @@ int main(int argc, char *argv[]) {
     std::cout << std::fixed << std::setprecision(4) << entropy << "   " << MAX_ENTROPY << "   " << 
                  entropy / MAX_ENTROPY << std::endl;
     */
-    // std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY << std::endl;
-    std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY;
+    std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY << std::endl;
+    std::cout << "RANDOM: " << is_random(OBJECT_SIZE, NUM_ALLOCS) << std::endl;
+    // std::cout << std::fixed << std::setprecision(4) << entropy / MAX_ENTROPY;
     // std::cout << "NUM_THREADS=" << NUM_THREADS << ", NUM_ALLOCS=" << NUM_ALLOCS << ", ALLOC_SIZE=" << OBJECT_SIZE << ", ENTROPY=" << entropy / MAX_ENTROPY << std::endl;
     return EXIT_SUCCESS;
 }
