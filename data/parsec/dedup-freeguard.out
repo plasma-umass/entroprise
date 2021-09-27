@@ -1,0 +1,127 @@
+[PARSEC] Benchmarks to run:  parsec.dedup
+
+[PARSEC] [========== Running benchmark parsec.dedup [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+FC-6-x86_64-disc1.iso
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/dedup/inst/amd64-linux.gcc/bin/dedup -c -p -v -t 2 -i FC-6-x86_64-disc1.iso -o output.dat.ddp':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/dedup/inst/amd64-linux.gcc/bin/dedup -c -p -v -t 2 -i FC-6-x86_64-disc1.iso -o output.dat.ddp 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Total input size:                      671.58 MB
+Total output size:                     637.28 MB
+Effective compression factor:            1.05x
+
+Mean data chunk size:                    1.88 KB (stddev: 2023.50 KB)
+Amount of duplicate chunks:             54.49%
+Data size after deduplication:         658.95 MB (compression factor: 1.02x)
+Data size after compression:           630.26 MB (compression factor: 1.05x)
+Output overhead:                         1.10%
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 27
+	Number of Unique Addresses: 33.2711
+	Calculated Entropy: 5.0562
+	Maximum Entropy: 4.75489
+	Normalized Entropy: 1.06337
+	Sequence is NOT random
+
+THREAD 1:
+	Number of Allocations: 361
+	Number of Unique Addresses: 457.054
+	Calculated Entropy: 8.83622
+	Maximum Entropy: 8.49586
+	Normalized Entropy: 1.04006
+	Sequence is POSSIBLY random
+
+THREAD 2:
+	Number of Allocations: 94417
+	Number of Unique Addresses: 84736
+	Calculated Entropy: 16.3707
+	Maximum Entropy: 16.5268
+	Normalized Entropy: 0.990556
+	Sequence is POSSIBLY random
+
+THREAD 3:
+	Number of Allocations: 275207
+	Number of Unique Addresses: 213039
+	Calculated Entropy: 17.7008
+	Maximum Entropy: 18.0702
+	Normalized Entropy: 0.979557
+	Sequence is POSSIBLY random
+
+THREAD 4:
+	Number of Allocations: 82817
+	Number of Unique Addresses: 107024
+	Calculated Entropy: 16.7076
+	Maximum Entropy: 16.3376
+	Normalized Entropy: 1.02264
+	Sequence is POSSIBLY random
+
+THREAD 5:
+	Number of Allocations: 85545
+	Number of Unique Addresses: 134367
+	Calculated Entropy: 17.0358
+	Maximum Entropy: 16.3844
+	Normalized Entropy: 1.03976
+	Sequence is POSSIBLY random
+
+THREAD 6:
+	Number of Allocations: 669236
+	Number of Unique Addresses: 38934.7
+	Calculated Entropy: 15.2488
+	Maximum Entropy: 19.3522
+	Normalized Entropy: 0.787962
+	Sequence is NOT random
+
+THREAD 7:
+	Number of Allocations: 677604
+	Number of Unique Addresses: 37141.7
+	Calculated Entropy: 15.1808
+	Maximum Entropy: 19.3701
+	Normalized Entropy: 0.783722
+	Sequence is NOT random
+
+THREAD 8:
+	Number of Allocations: 5248
+	Number of Unique Addresses: 572.337
+	Calculated Entropy: 9.16072
+	Maximum Entropy: 12.3576
+	Normalized Entropy: 0.741306
+	Sequence is POSSIBLY random
+
+SUMMARY:
+	Total Number of Threads: 9
+	Total Number of Allocations: 1890462
+
+	Average Number of Allocations: 25315.3
+	Average Number of Unique Addresses: 11406
+	Average Calculated Entropy: 12.5664
+	Average Maximum Entropy: 13.5066
+	Average Normalized Entropy: 0.930387
+
+	Minimum Number of Allocations: 27
+	Maximum Number of Allocations: 677604
+	Minimum Normalized Entropy: 0.741306
+	Maximum Normalized Entropy: 1.06337
+	Number of Allocations Standard Deviation: 319015
+	Normalized Entropy Standard Deviation: 0.121916
+
+	6 / 9 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

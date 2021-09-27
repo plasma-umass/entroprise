@@ -1,0 +1,57 @@
+[PARSEC] Benchmarks to run:  parsec.blackscholes
+
+[PARSEC] [========== Running benchmark parsec.blackscholes [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+in_10M.txt
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/blackscholes/inst/amd64-linux.gcc/bin/blackscholes 8 in_10M.txt prices.txt':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/blackscholes/inst/amd64-linux.gcc/bin/blackscholes 8 in_10M.txt prices.txt 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Num of Options: 10000000
+Num of Runs: 100
+Size of data: 400000000
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 20
+	Number of Unique Addresses: 18.6104
+	Calculated Entropy: 4.21804
+	Maximum Entropy: 4.32193
+	Normalized Entropy: 0.975962
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 1
+	Total Number of Allocations: 20
+
+	Average Number of Allocations: 20
+	Average Number of Unique Addresses: 18.6104
+	Average Calculated Entropy: 4.21804
+	Average Maximum Entropy: 4.32193
+	Average Normalized Entropy: 0.975962
+
+	Minimum Number of Allocations: 20
+	Maximum Number of Allocations: 20
+	Minimum Normalized Entropy: 0.975962
+	Maximum Normalized Entropy: 0.975962
+	Number of Allocations Standard Deviation: 0
+	Normalized Entropy Standard Deviation: 0
+
+	0 / 1 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

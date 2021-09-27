@@ -1,0 +1,109 @@
+[PARSEC] Benchmarks to run:  parsec.vips
+
+[PARSEC] [========== Running benchmark parsec.vips [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+orion_18000x18000.v
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libjemalloc.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/vips/inst/amd64-linux.gcc/bin/vips im_benchmark orion_18000x18000.v output.v':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libjemalloc.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/vips/inst/amd64-linux.gcc/bin/vips im_benchmark orion_18000x18000.v output.v 
+------------------------------------------------------------
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 1704
+	Number of Unique Addresses: 1331.49
+	Calculated Entropy: 10.3788
+	Maximum Entropy: 10.7347
+	Normalized Entropy: 0.966848
+	Sequence is POSSIBLY random
+
+THREAD 1:
+	Number of Allocations: 341264
+	Number of Unique Addresses: 5691.06
+	Calculated Entropy: 12.4745
+	Maximum Entropy: 18.3805
+	Normalized Entropy: 0.678679
+	Sequence is NOT random
+
+THREAD 2:
+	Number of Allocations: 339825
+	Number of Unique Addresses: 3960.39
+	Calculated Entropy: 11.9514
+	Maximum Entropy: 18.3744
+	Normalized Entropy: 0.650438
+	Sequence is NOT random
+
+THREAD 3:
+	Number of Allocations: 339696
+	Number of Unique Addresses: 4073.26
+	Calculated Entropy: 11.992
+	Maximum Entropy: 18.3739
+	Normalized Entropy: 0.652664
+	Sequence is NOT random
+
+THREAD 4:
+	Number of Allocations: 341055
+	Number of Unique Addresses: 4006.77
+	Calculated Entropy: 11.9682
+	Maximum Entropy: 18.3796
+	Normalized Entropy: 0.651167
+	Sequence is NOT random
+
+THREAD 5:
+	Number of Allocations: 338951
+	Number of Unique Addresses: 3791.33
+	Calculated Entropy: 11.8885
+	Maximum Entropy: 18.3707
+	Normalized Entropy: 0.647143
+	Sequence is NOT random
+
+THREAD 6:
+	Number of Allocations: 338241
+	Number of Unique Addresses: 3510.9
+	Calculated Entropy: 11.7776
+	Maximum Entropy: 18.3677
+	Normalized Entropy: 0.641214
+	Sequence is NOT random
+
+THREAD 7:
+	Number of Allocations: 341566
+	Number of Unique Addresses: 3719.06
+	Calculated Entropy: 11.8607
+	Maximum Entropy: 18.3818
+	Normalized Entropy: 0.645243
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 8
+	Total Number of Allocations: 2382302
+
+	Average Number of Allocations: 175417
+	Average Number of Unique Addresses: 3532.49
+	Average Calculated Entropy: 11.772
+	Average Maximum Entropy: 17.1814
+	Average Normalized Entropy: 0.68516
+
+	Minimum Number of Allocations: 1704
+	Maximum Number of Allocations: 341566
+	Minimum Normalized Entropy: 0.641214
+	Maximum Normalized Entropy: 0.966848
+	Number of Allocations Standard Deviation: 165830
+	Normalized Entropy Standard Deviation: 0.104748
+
+	1 / 8 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

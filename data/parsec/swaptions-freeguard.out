@@ -1,0 +1,119 @@
+[PARSEC] Benchmarks to run:  parsec.swaptions
+
+[PARSEC] [========== Running benchmark parsec.swaptions [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] No archive for input 'native' available, skipping input setup.
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/swaptions/inst/amd64-linux.gnu++98-config/bin/swaptions -ns 128 -sm 1000000 -nt 8':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/swaptions/inst/amd64-linux.gnu++98-config/bin/swaptions -ns 128 -sm 1000000 -nt 8 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+ENTROPRISE ERROR: extend_data(): mmap failed
+Number of Simulations: 1000000,  Number of threads: 8 Number of swaptions: 128
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 401
+	Number of Unique Addresses: 276.092
+	Calculated Entropy: 8.10901
+	Maximum Entropy: 8.64746
+	Normalized Entropy: 0.937733
+	Sequence is POSSIBLY random
+
+THREAD 1:
+	Number of Allocations: 2090375
+	Number of Unique Addresses: 53895.3
+	Calculated Entropy: 15.7179
+	Maximum Entropy: 20.9953
+	Normalized Entropy: 0.748637
+	Sequence is NOT random
+
+THREAD 2:
+	Number of Allocations: 2097152
+	Number of Unique Addresses: 85538.4
+	Calculated Entropy: 16.3843
+	Maximum Entropy: 21
+	Normalized Entropy: 0.780204
+	Sequence is NOT random
+
+THREAD 3:
+	Number of Allocations: 2097152
+	Number of Unique Addresses: 49091.6
+	Calculated Entropy: 15.5832
+	Maximum Entropy: 21
+	Normalized Entropy: 0.742057
+	Sequence is NOT random
+
+THREAD 4:
+	Number of Allocations: 2103628
+	Number of Unique Addresses: 51912.9
+	Calculated Entropy: 15.6638
+	Maximum Entropy: 21.0044
+	Normalized Entropy: 0.745738
+	Sequence is NOT random
+
+THREAD 5:
+	Number of Allocations: 2107660
+	Number of Unique Addresses: 54284
+	Calculated Entropy: 15.7282
+	Maximum Entropy: 21.0072
+	Normalized Entropy: 0.748707
+	Sequence is NOT random
+
+THREAD 6:
+	Number of Allocations: 2121897
+	Number of Unique Addresses: 68638.7
+	Calculated Entropy: 16.0667
+	Maximum Entropy: 21.0169
+	Normalized Entropy: 0.764467
+	Sequence is NOT random
+
+THREAD 7:
+	Number of Allocations: 2137768
+	Number of Unique Addresses: 59741.1
+	Calculated Entropy: 15.8664
+	Maximum Entropy: 21.0277
+	Normalized Entropy: 0.75455
+	Sequence is NOT random
+
+THREAD 8:
+	Number of Allocations: 2115142
+	Number of Unique Addresses: 73318.6
+	Calculated Entropy: 16.1619
+	Maximum Entropy: 21.0123
+	Normalized Entropy: 0.769163
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 9
+	Total Number of Allocations: 16871175
+
+	Average Number of Allocations: 813959
+	Average Number of Unique Addresses: 33486.1
+	Average Calculated Entropy: 14.7492
+	Average Maximum Entropy: 19.0349
+	Average Normalized Entropy: 0.77485
+
+	Minimum Number of Allocations: 401
+	Maximum Number of Allocations: 2137768
+	Minimum Normalized Entropy: 0.742057
+	Maximum Normalized Entropy: 0.937733
+	Number of Allocations Standard Deviation: 1.25066e+06
+	Normalized Entropy Standard Deviation: 0.0581237
+
+	1 / 9 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

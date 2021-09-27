@@ -1,0 +1,246 @@
+[PARSEC] Benchmarks to run:  parsec.swaptions
+
+[PARSEC] [========== Running benchmark parsec.swaptions [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] No archive for input 'native' available, skipping input setup.
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libmimalloc.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/swaptions/inst/amd64-linux.gnu++98-config/bin/swaptions -ns 128 -sm 1000000 -nt 8':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libmimalloc.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/swaptions/inst/amd64-linux.gnu++98-config/bin/swaptions -ns 128 -sm 1000000 -nt 8 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Swaption 0: [SwaptionPrice: 6.9308996856 StdError: 0.0001281769] 
+Swaption 1: [SwaptionPrice: 3.2383555687 StdError: 0.0000885494] 
+Swaption 2: [SwaptionPrice: 0.8539429389 StdError: 0.0000332498] 
+Swaption 3: [SwaptionPrice: 6.4805789627 StdError: 0.0001697608] 
+Swaption 4: [SwaptionPrice: 79.7597089292 StdError: 0.0019574449] 
+Swaption 5: [SwaptionPrice: 6.8632380328 StdError: 0.0002323312] 
+Swaption 6: [SwaptionPrice: 81.2949511024 StdError: 0.0016720793] 
+Swaption 7: [SwaptionPrice: 3.0596429986 StdError: 0.0000618400] 
+Swaption 8: [SwaptionPrice: 112.3555288366 StdError: 0.0019670256] 
+Swaption 9: [SwaptionPrice: 3.0596715207 StdError: 0.0000618275] 
+Swaption 10: [SwaptionPrice: 12.0720713590 StdError: 0.0002880800] 
+Swaption 11: [SwaptionPrice: 24.0296569095 StdError: 0.0004288334] 
+Swaption 12: [SwaptionPrice: 96.6757972847 StdError: 0.0024780588] 
+Swaption 13: [SwaptionPrice: 1.1506968698 StdError: 0.0000390812] 
+Swaption 14: [SwaptionPrice: 9.2847008418 StdError: 0.0002134707] 
+Swaption 15: [SwaptionPrice: 9.6489325072 StdError: 0.0002048114] 
+Swaption 16: [SwaptionPrice: 22.3083220815 StdError: 0.0006973386] 
+Swaption 17: [SwaptionPrice: 191.6913223937 StdError: 0.0051190718] 
+Swaption 18: [SwaptionPrice: 1.7116698953 StdError: 0.0000783483] 
+Swaption 19: [SwaptionPrice: 122.2903134049 StdError: 0.0023675441] 
+Swaption 20: [SwaptionPrice: 1.6306856664 StdError: 0.0000618925] 
+Swaption 21: [SwaptionPrice: 3.4229006113 StdError: 0.0001233864] 
+Swaption 22: [SwaptionPrice: 0.0000202476 StdError: 0.0000005230] 
+Swaption 23: [SwaptionPrice: 20.6013355069 StdError: 0.0005816071] 
+Swaption 24: [SwaptionPrice: 60.5867562240 StdError: 0.0012911636] 
+Swaption 25: [SwaptionPrice: 23.2904132030 StdError: 0.0004956087] 
+Swaption 26: [SwaptionPrice: 197.2937016767 StdError: 0.0043842100] 
+Swaption 27: [SwaptionPrice: 86.7915325662 StdError: 0.0021440191] 
+Swaption 28: [SwaptionPrice: 5.7417588081 StdError: 0.0001488727] 
+Swaption 29: [SwaptionPrice: 2.6784085783 StdError: 0.0000977552] 
+Swaption 30: [SwaptionPrice: 59.0539225950 StdError: 0.0013028085] 
+Swaption 31: [SwaptionPrice: 23.8804140353 StdError: 0.0004424166] 
+Swaption 32: [SwaptionPrice: 46.0213721829 StdError: 0.0012506518] 
+Swaption 33: [SwaptionPrice: 30.4913503894 StdError: 0.0008166953] 
+Swaption 34: [SwaptionPrice: 61.7893626445 StdError: 0.0019207329] 
+Swaption 35: [SwaptionPrice: 10.2641466423 StdError: 0.0001912526] 
+Swaption 36: [SwaptionPrice: 8.3992788907 StdError: 0.0002000907] 
+Swaption 37: [SwaptionPrice: 0.4072952363 StdError: 0.0000258590] 
+Swaption 38: [SwaptionPrice: 0.0000000000 StdError: 0.0000000000] 
+Swaption 39: [SwaptionPrice: 5.9838150303 StdError: 0.0001259194] 
+Swaption 40: [SwaptionPrice: 8.8575318959 StdError: 0.0002613931] 
+Swaption 41: [SwaptionPrice: 3.8133401685 StdError: 0.0001072630] 
+Swaption 42: [SwaptionPrice: 94.8450486159 StdError: 0.0026584288] 
+Swaption 43: [SwaptionPrice: 140.7225654832 StdError: 0.0038700793] 
+Swaption 44: [SwaptionPrice: 16.3924135539 StdError: 0.0004030963] 
+Swaption 45: [SwaptionPrice: 61.4298435985 StdError: 0.0009925376] 
+Swaption 46: [SwaptionPrice: 38.9843911634 StdError: 0.0009896545] 
+Swaption 47: [SwaptionPrice: 26.3854971462 StdError: 0.0004184330] 
+Swaption 48: [SwaptionPrice: 188.6696416785 StdError: 0.0032353794] 
+Swaption 49: [SwaptionPrice: 5.5584861219 StdError: 0.0001532916] 
+Swaption 50: [SwaptionPrice: 9.5290109633 StdError: 0.0002011869] 
+Swaption 51: [SwaptionPrice: 1.2650699290 StdError: 0.0000621588] 
+Swaption 52: [SwaptionPrice: 190.9823914100 StdError: 0.0030283903] 
+Swaption 53: [SwaptionPrice: 44.1134192196 StdError: 0.0008872009] 
+Swaption 54: [SwaptionPrice: 38.5477504800 StdError: 0.0009121827] 
+Swaption 55: [SwaptionPrice: 8.6995195462 StdError: 0.0002699252] 
+Swaption 56: [SwaptionPrice: 12.4022310796 StdError: 0.0003294927] 
+Swaption 57: [SwaptionPrice: 2.0634027876 StdError: 0.0000611683] 
+Swaption 58: [SwaptionPrice: 10.4059896777 StdError: 0.0002508188] 
+Swaption 59: [SwaptionPrice: 0.0000000000 StdError: 0.0000000000] 
+Swaption 60: [SwaptionPrice: 150.4452839030 StdError: 0.0029717490] 
+Swaption 61: [SwaptionPrice: 1.0713989763 StdError: 0.0000554323] 
+Swaption 62: [SwaptionPrice: 0.3539687800 StdError: 0.0000282987] 
+Swaption 63: [SwaptionPrice: 96.6793651810 StdError: 0.0024795718] 
+Swaption 64: [SwaptionPrice: 7.5373588456 StdError: 0.0001702569] 
+Swaption 65: [SwaptionPrice: 18.7596407202 StdError: 0.0004032158] 
+Swaption 66: [SwaptionPrice: 18.9968696243 StdError: 0.0003817773] 
+Swaption 67: [SwaptionPrice: 211.2556599290 StdError: 0.0033551325] 
+Swaption 68: [SwaptionPrice: 0.0928275592 StdError: 0.0000296934] 
+Swaption 69: [SwaptionPrice: 91.1304490041 StdError: 0.0017484985] 
+Swaption 70: [SwaptionPrice: 15.4138793457 StdError: 0.0003951534] 
+Swaption 71: [SwaptionPrice: 286.3909150841 StdError: 0.0043489133] 
+Swaption 72: [SwaptionPrice: 18.0231057482 StdError: 0.0005798097] 
+Swaption 73: [SwaptionPrice: 75.6532486486 StdError: 0.0023498392] 
+Swaption 74: [SwaptionPrice: 2.7539273514 StdError: 0.0000898739] 
+Swaption 75: [SwaptionPrice: 10.7119718443 StdError: 0.0002237794] 
+Swaption 76: [SwaptionPrice: 76.1387928626 StdError: 0.0012685038] 
+Swaption 77: [SwaptionPrice: 68.7282993139 StdError: 0.0011467102] 
+Swaption 78: [SwaptionPrice: 1.3064030320 StdError: 0.0000573667] 
+Swaption 79: [SwaptionPrice: 15.9342156604 StdError: 0.0002491913] 
+Swaption 80: [SwaptionPrice: 6.2562229330 StdError: 0.0001970062] 
+Swaption 81: [SwaptionPrice: 2.6522071878 StdError: 0.0000654745] 
+Swaption 82: [SwaptionPrice: 0.1527133839 StdError: 0.0000256283] 
+Swaption 83: [SwaptionPrice: 0.4986327111 StdError: 0.0000340902] 
+Swaption 84: [SwaptionPrice: 32.0753513572 StdError: 0.0006341201] 
+Swaption 85: [SwaptionPrice: 5.2329008399 StdError: 0.0001347376] 
+Swaption 86: [SwaptionPrice: 15.9906609113 StdError: 0.0005475902] 
+Swaption 87: [SwaptionPrice: 81.4040726339 StdError: 0.0015796976] 
+Swaption 88: [SwaptionPrice: 112.3756524178 StdError: 0.0020780283] 
+Swaption 89: [SwaptionPrice: 46.7297847889 StdError: 0.0011270007] 
+Swaption 90: [SwaptionPrice: 66.9458925526 StdError: 0.0014450547] 
+Swaption 91: [SwaptionPrice: 13.7297890035 StdError: 0.0003706205] 
+Swaption 92: [SwaptionPrice: 61.1990590913 StdError: 0.0019791447] 
+Swaption 93: [SwaptionPrice: 97.6057874493 StdError: 0.0023890464] 
+Swaption 94: [SwaptionPrice: 29.5627565970 StdError: 0.0009047544] 
+Swaption 95: [SwaptionPrice: 2.1676076651 StdError: 0.0000508159] 
+Swaption 96: [SwaptionPrice: 36.9663390061 StdError: 0.0011849224] 
+Swaption 97: [SwaptionPrice: 31.7616075257 StdError: 0.0008105174] 
+Swaption 98: [SwaptionPrice: 18.8765015708 StdError: 0.0003046775] 
+Swaption 99: [SwaptionPrice: 15.9021053526 StdError: 0.0004235687] 
+Swaption 100: [SwaptionPrice: 11.4773335621 StdError: 0.0002659556] 
+Swaption 101: [SwaptionPrice: 18.8333639353 StdError: 0.0005004865] 
+Swaption 102: [SwaptionPrice: 22.1561481277 StdError: 0.0006008953] 
+Swaption 103: [SwaptionPrice: 46.7299451878 StdError: 0.0011260092] 
+Swaption 104: [SwaptionPrice: 5.9811686308 StdError: 0.0001263721] 
+Swaption 105: [SwaptionPrice: 43.8039843731 StdError: 0.0010351394] 
+Swaption 106: [SwaptionPrice: 7.1166626406 StdError: 0.0001214493] 
+Swaption 107: [SwaptionPrice: 48.7130522455 StdError: 0.0009028807] 
+Swaption 108: [SwaptionPrice: 152.5613749007 StdError: 0.0026632625] 
+Swaption 109: [SwaptionPrice: 6.3859547110 StdError: 0.0001840767] 
+Swaption 110: [SwaptionPrice: 61.4930567199 StdError: 0.0019522033] 
+Swaption 111: [SwaptionPrice: 108.9908676055 StdError: 0.0022672317] 
+Swaption 112: [SwaptionPrice: 6.0994240654 StdError: 0.0002074095] 
+Swaption 113: [SwaptionPrice: 71.7437402974 StdError: 0.0018031231] 
+Swaption 114: [SwaptionPrice: 25.5907660197 StdError: 0.0005477197] 
+Swaption 115: [SwaptionPrice: 15.5345064821 StdError: 0.0002841570] 
+Swaption 116: [SwaptionPrice: 3.2648097075 StdError: 0.0000982979] 
+Swaption 117: [SwaptionPrice: 9.5111151908 StdError: 0.0003177891] 
+Swaption 118: [SwaptionPrice: 44.4436516039 StdError: 0.0009759172] 
+Swaption 119: [SwaptionPrice: 16.2891466061 StdError: 0.0004126648] 
+Swaption 120: [SwaptionPrice: 6.0353126150 StdError: 0.0001214417] 
+Swaption 121: [SwaptionPrice: 36.4776225034 StdError: 0.0006647017] 
+Swaption 122: [SwaptionPrice: 3.5994477904 StdError: 0.0001287231] 
+Swaption 123: [SwaptionPrice: 27.0365452585 StdError: 0.0008900992] 
+Swaption 124: [SwaptionPrice: 0.9409099065 StdError: 0.0000438295] 
+Swaption 125: [SwaptionPrice: 6.4842568604 StdError: 0.0001744706] 
+Swaption 126: [SwaptionPrice: 36.0282745079 StdError: 0.0007047898] 
+Swaption 127: [SwaptionPrice: 19.4889756200 StdError: 0.0004389723] 
+Number of Simulations: 1000000,  Number of threads: 8 Number of swaptions: 128
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 398
+	Number of Unique Addresses: 341.905
+	Calculated Entropy: 8.41745
+	Maximum Entropy: 8.63662
+	Normalized Entropy: 0.974623
+	Sequence is NOT random
+
+THREAD 1:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 284.783
+	Calculated Entropy: 8.15372
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.362121
+	Sequence is NOT random
+
+THREAD 2:
+	Number of Allocations: 6000177
+	Number of Unique Addresses: 219.979
+	Calculated Entropy: 7.78122
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.345577
+	Sequence is NOT random
+
+THREAD 3:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 348.662
+	Calculated Entropy: 8.44568
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.375087
+	Sequence is NOT random
+
+THREAD 4:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 241.675
+	Calculated Entropy: 7.91693
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.351604
+	Sequence is NOT random
+
+THREAD 5:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 265.597
+	Calculated Entropy: 8.0531
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.357652
+	Sequence is NOT random
+
+THREAD 6:
+	Number of Allocations: 6000177
+	Number of Unique Addresses: 262.534
+	Calculated Entropy: 8.03636
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.356909
+	Sequence is NOT random
+
+THREAD 7:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 272.258
+	Calculated Entropy: 8.08883
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.359239
+	Sequence is NOT random
+
+THREAD 8:
+	Number of Allocations: 6000176
+	Number of Unique Addresses: 187.684
+	Calculated Entropy: 7.55216
+	Maximum Entropy: 22.5166
+	Normalized Entropy: 0.335405
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 9
+	Total Number of Allocations: 48001808
+
+	Average Number of Allocations: 2.06021e+06
+	Average Number of Unique Addresses: 264.935
+	Average Calculated Entropy: 8.04504
+	Average Maximum Entropy: 20.2424
+	Average Normalized Entropy: 0.397435
+
+	Minimum Number of Allocations: 398
+	Maximum Number of Allocations: 6000177
+	Minimum Normalized Entropy: 0.335405
+	Maximum Normalized Entropy: 0.974623
+	Number of Allocations Standard Deviation: 3.77756e+06
+	Normalized Entropy Standard Deviation: 0.196699
+
+	0 / 9 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

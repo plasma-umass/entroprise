@@ -1,0 +1,59 @@
+[PARSEC] Benchmarks to run:  parsec.fluidanimate
+
+[PARSEC] [========== Running benchmark parsec.fluidanimate [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+in_500K.fluid
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/fluidanimate/inst/amd64-linux.gnu++98-config/bin/fluidanimate 8 500 in_500K.fluid out.fluid':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/apps/fluidanimate/inst/amd64-linux.gnu++98-config/bin/fluidanimate 8 500 in_500K.fluid out.fluid 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Loading file "in_500K.fluid"...
+Number of cells: 229900
+Grids steps over x, y, z: 0.00236364 0.00236842 0.00236364
+Number of particles: 501642
+Saving file "out.fluid"...
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 229933
+	Number of Unique Addresses: 133425
+	Calculated Entropy: 17.0257
+	Maximum Entropy: 17.8109
+	Normalized Entropy: 0.955915
+	Sequence is POSSIBLY random
+
+SUMMARY:
+	Total Number of Threads: 1
+	Total Number of Allocations: 229933
+
+	Average Number of Allocations: 229933
+	Average Number of Unique Addresses: 133425
+	Average Calculated Entropy: 17.0257
+	Average Maximum Entropy: 17.8109
+	Average Normalized Entropy: 0.955915
+
+	Minimum Number of Allocations: 229933
+	Maximum Number of Allocations: 229933
+	Minimum Normalized Entropy: 0.955915
+	Maximum Normalized Entropy: 0.955915
+	Number of Allocations Standard Deviation: 0
+	Normalized Entropy Standard Deviation: 0
+
+	1 / 1 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

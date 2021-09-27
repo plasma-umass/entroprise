@@ -1,0 +1,144 @@
+[PARSEC] Benchmarks to run:  parsec.canneal
+
+[PARSEC] [========== Running benchmark parsec.canneal [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+2500000.nets
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/canneal/inst/amd64-linux.gcc/bin/canneal 7 15000 2000 2500000.nets 6000':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libdieharder.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/canneal/inst/amd64-linux.gcc/bin/canneal 7 15000 2000 2500000.nets 6000 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Threadcount: 7
+15000 swaps per temperature step
+start temperature: 2000
+netlist filename: 2500000.nets
+number of temperature steps: 6000
+locs created
+locs assigned
+Just saw element: 100000
+Just saw element: 200000
+Just saw element: 300000
+Just saw element: 400000
+Just saw element: 500000
+Just saw element: 600000
+Just saw element: 700000
+Just saw element: 800000
+Just saw element: 900000
+Just saw element: 1000000
+Just saw element: 1100000
+Just saw element: 1200000
+Just saw element: 1300000
+Just saw element: 1400000
+Just saw element: 1500000
+Just saw element: 1600000
+Just saw element: 1700000
+Just saw element: 1800000
+Just saw element: 1900000
+Just saw element: 2000000
+Just saw element: 2100000
+Just saw element: 2200000
+Just saw element: 2300000
+Just saw element: 2400000
+Just saw element: 2500000
+netlist created. 2500000 elements.
+Final routing is: 9.03365e+09
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 21141432
+	Number of Unique Addresses: 1.00018e+07
+	Calculated Entropy: 23.2538
+	Maximum Entropy: 24.3336
+	Normalized Entropy: 0.955624
+	Sequence is NOT random
+
+THREAD 1:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 2:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 3:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 4:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 5:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 6:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+THREAD 7:
+	Number of Allocations: 1
+	Number of Unique Addresses: 1.03262
+	Calculated Entropy: 0.0463043
+	Maximum Entropy: 0
+	Normalized Entropy: inf
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 8
+	Total Number of Allocations: 21141439
+
+	Average Number of Allocations: 8.23459
+	Average Number of Unique Addresses: 7.7127
+	Average Calculated Entropy: 0.100747
+	Average Maximum Entropy: 0
+	Average Normalized Entropy: inf
+
+	Minimum Number of Allocations: 1
+	Maximum Number of Allocations: 21141432
+	Minimum Normalized Entropy: 0.955624
+	Maximum Normalized Entropy: inf
+	Number of Allocations Standard Deviation: 7.47462e+06
+	Normalized Entropy Standard Deviation: -nan
+
+	0 / 8 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.

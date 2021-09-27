@@ -1,0 +1,96 @@
+[PARSEC] Benchmarks to run:  parsec.canneal
+
+[PARSEC] [========== Running benchmark parsec.canneal [1] ==========]
+[PARSEC] Deleting old run directory.
+[PARSEC] Setting up run directory.
+[PARSEC] Unpacking benchmark input 'native'.
+2500000.nets
+[PARSEC] Running '/home/msteranka/entroprise/libentroprise/entroprise -a /nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/canneal/inst/amd64-linux.gcc/bin/canneal 7 15000 2000 2500000.nets 6000':
+[PARSEC] [---------- Beginning of output ----------]
+
+OUTPUT OF LD_PRELOAD=/home/msteranka/entroprise/libentroprise/libentroprise.so:/nfs/cm/scratch1/emery/msteranka/shared/libfreeguard.so /home/msteranka/scratch/parsec-3.0/pkgs/kernels/canneal/inst/amd64-linux.gcc/bin/canneal 7 15000 2000 2500000.nets 6000 
+------------------------------------------------------------
+PARSEC Benchmark Suite Version 3.0-beta-20150206
+Threadcount: 7
+15000 swaps per temperature step
+start temperature: 2000
+netlist filename: 2500000.nets
+number of temperature steps: 6000
+locs created
+locs assigned
+Just saw element: 100000
+Just saw element: 200000
+Just saw element: 300000
+Just saw element: 400000
+Just saw element: 500000
+Just saw element: 600000
+Just saw element: 700000
+Just saw element: 800000
+Just saw element: 900000
+Just saw element: 1000000
+Just saw element: 1100000
+Just saw element: 1200000
+Just saw element: 1300000
+Just saw element: 1400000
+Just saw element: 1500000
+Just saw element: 1600000
+Just saw element: 1700000
+Just saw element: 1800000
+Just saw element: 1900000
+Just saw element: 2000000
+Just saw element: 2100000
+Just saw element: 2200000
+Just saw element: 2300000
+Just saw element: 2400000
+Just saw element: 2500000
+netlist created. 2500000 elements.
+ENTROPRISE ERROR: extend_data(): mmap failed
+------------------------------------------------------------
+END OF OUTPUT
+
+
+
+ENTROPRISE RESULTS
+------------------------------------------------------------
+THREAD 0:
+	Number of Allocations: 21141430
+	Number of Unique Addresses: 9.29425e+06
+	Calculated Entropy: 23.1479
+	Maximum Entropy: 24.3336
+	Normalized Entropy: 0.951275
+	Sequence is NOT random
+
+THREAD 1:
+	Number of Allocations: 0
+	Number of Unique Addresses: -nan
+	Calculated Entropy: -nan
+	Maximum Entropy: -inf
+	Normalized Entropy: -nan
+	Sequence is NOT random
+
+SUMMARY:
+	Total Number of Threads: 2
+	Total Number of Allocations: 21141430
+
+	Average Number of Allocations: 0
+	Average Number of Unique Addresses: -nan
+	Average Calculated Entropy: -nan
+	Average Maximum Entropy: inf
+	Average Normalized Entropy: -nan
+
+	Minimum Number of Allocations: 0
+	Maximum Number of Allocations: 21141430
+	Minimum Normalized Entropy: 0.951275
+	Maximum Normalized Entropy: 0.951275
+	Number of Allocations Standard Deviation: 1.49492e+07
+	Normalized Entropy Standard Deviation: -nan
+
+	0 / 2 Random Sequences
+
+[PARSEC] [----------    End of output    ----------]
+[PARSEC]
+[PARSEC] BIBLIOGRAPHY
+[PARSEC]
+[PARSEC] [1] Bienia. Benchmarking Modern Multiprocessors. Ph.D. Thesis, 2011.
+[PARSEC]
+[PARSEC] Done.
